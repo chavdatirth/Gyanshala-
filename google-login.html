@@ -102,6 +102,8 @@
             flex-direction: column;
             border-bottom: 1px solid var(--google-gray-300);
             margin-bottom: 20px;
+            max-height: 250px;
+            overflow-y: auto;
         }
 
         .account-item {
@@ -135,13 +137,6 @@
             font-weight: 500;
             margin-right: 12px;
             flex-shrink: 0;
-        }
-
-        .avatar img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
         }
 
         .account-info {
@@ -363,55 +358,8 @@
             <h2 class="header-title">Choose an account</h2>
             <p class="header-subtitle">to continue to <a href="index.html">gyanshala.org</a></p>
 
-            <div class="account-list">
-                <!-- User 1: Volunteer -->
-                <button class="account-item" onclick="selectGoogleAccount('Zenish Patel', 'zenish.patel@gmail.com', 'volunteer')">
-                    <div class="avatar" style="background-color: #8B5CF6;">ZP</div>
-                    <div class="account-info">
-                        <span class="account-name">Zenish Patel</span>
-                        <span class="account-email">zenish.patel@gmail.com</span>
-                    </div>
-                </button>
-
-                <!-- User 2: Supervisor -->
-                <button class="account-item" onclick="selectGoogleAccount('Rajesh Patel', 'rajesh.supervisor@gmail.com', 'supervisor')">
-                    <div class="avatar" style="background-color: #3B82F6;">RP</div>
-                    <div class="account-info">
-                        <span class="account-name">Rajesh Patel</span>
-                        <span class="account-email">rajesh.supervisor@gmail.com</span>
-                    </div>
-                </button>
-
-                <!-- User 3: Teacher -->
-                <button class="account-item" onclick="selectGoogleAccount('Anjali Desai', 'anjali.teacher@gmail.com', 'teacher')">
-                    <div class="avatar" style="background-color: #10B981;">AD</div>
-                    <div class="account-info">
-                        <span class="account-name">Anjali Desai</span>
-                        <span class="account-email">anjali.teacher@gmail.com</span>
-                    </div>
-                </button>
-
-                <!-- User 4: Admin -->
-                <button class="account-item" onclick="selectGoogleAccount('Admin Leader', 'admin.office@gmail.com', 'main_office')">
-                    <div class="avatar" style="background-color: #EF4444;">AL</div>
-                    <div class="account-info">
-                        <span class="account-name">Admin Leader</span>
-                        <span class="account-email">admin.office@gmail.com</span>
-                    </div>
-                </button>
-
-                <!-- Custom Account -->
-                <button class="account-item" onclick="showCustomAccountForm()">
-                    <div class="avatar" style="background-color: #f1f3f4; color: var(--google-gray-700);">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="8" r="4"/>
-                            <path d="M18 21a6 6 0 0 0-12 0"/>
-                        </svg>
-                    </div>
-                    <div class="account-info">
-                        <span class="account-name" style="color: var(--google-blue); font-weight: 500;">Use another account</span>
-                    </div>
-                </button>
+            <div class="account-list" id="dynamic-account-list">
+                <!-- Accounts are rendered dynamically here -->
             </div>
 
             <p class="disclaimer-text">
@@ -501,6 +449,68 @@
         };
         let activeRole = 'volunteer';
 
+        // Preseed users database with default demo accounts if empty
+        function preseedUsersIfEmpty() {
+            let users = JSON.parse(localStorage.getItem('users') || '[]');
+            if (users.length === 0) {
+                users = [
+                    { id: 'USER-G-1', fullName: 'Zenish Patel', email: 'zenish.patel@gmail.com', role: 'volunteer', password: 'password123', approved: true },
+                    { id: 'USER-G-2', fullName: 'Rajesh Patel', email: 'rajesh.supervisor@gmail.com', role: 'supervisor', password: 'password123', approved: true },
+                    { id: 'USER-G-3', fullName: 'Anjali Desai', email: 'anjali.teacher@gmail.com', role: 'teacher', password: 'password123', approved: true },
+                    { id: 'USER-G-4', fullName: 'Admin Leader', email: 'admin.office@gmail.com', role: 'main_office', password: 'password123', approved: true }
+                ];
+                localStorage.setItem('users', JSON.stringify(users));
+            }
+        }
+
+        // Render existing system accounts dynamically
+        function renderGoogleAccounts() {
+            preseedUsersIfEmpty();
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const listEl = document.getElementById('dynamic-account-list');
+            if (!listEl) return;
+
+            listEl.innerHTML = '';
+
+            users.forEach(u => {
+                const initials = u.fullName.split(' ').map(n => n.charAt(0)).join('').toUpperCase();
+                let avatarColor = '#1a73e8';
+                if (u.role === 'volunteer') avatarColor = '#8B5CF6';
+                else if (u.role === 'supervisor') avatarColor = '#3B82F6';
+                else if (u.role === 'teacher') avatarColor = '#10B981';
+                else if (u.role === 'main_office') avatarColor = '#EF4444';
+
+                const button = document.createElement('button');
+                button.className = 'account-item';
+                button.onclick = () => selectGoogleAccount(u.fullName, u.email, u.role);
+                button.innerHTML = `
+                    <div class="avatar" style="background-color: ${avatarColor};">${initials}</div>
+                    <div class="account-info">
+                        <span class="account-name">${u.fullName}</span>
+                        <span class="account-email">${u.email}</span>
+                    </div>
+                `;
+                listEl.appendChild(button);
+            });
+
+            // Append Google "Use another account" button
+            const customBtn = document.createElement('button');
+            customBtn.className = 'account-item';
+            customBtn.onclick = () => showCustomAccountForm();
+            customBtn.innerHTML = `
+                <div class="avatar" style="background-color: #f1f3f4; color: var(--google-gray-700);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="8" r="4"/>
+                        <path d="M18 21a6 6 0 0 0-12 0"/>
+                    </svg>
+                </div>
+                <div class="account-info">
+                    <span class="account-name" style="color: var(--google-blue); font-weight: 500;">Use another account</span>
+                </div>
+            `;
+            listEl.appendChild(customBtn);
+        }
+
         // Select Role Only inside dynamic selector
         function selectRoleOnly(role, cardElement) {
             activeRole = role;
@@ -538,7 +548,7 @@
                 }
             });
 
-            // Transition directly to Select Role panel (No OTP!)
+            // Transition directly to Select Role panel
             document.getElementById('panel-choose-account').classList.remove('active');
             document.getElementById('panel-select-role').classList.add('active');
             document.getElementById('logo-block').classList.add('centered');
@@ -568,7 +578,7 @@
             selectedUser = {
                 name: name,
                 email: email,
-                role: 'volunteer' // Default
+                role: 'volunteer'
             };
 
             const initials = name.split(' ').map(n => n.charAt(0)).join('').toUpperCase();
@@ -632,6 +642,9 @@
                 window.location.href = 'volunteer-dashboard.html';
             }
         }
+
+        // Run dynamic accounts rendering on load
+        renderGoogleAccounts();
     </script>
 </body>
 </html>
