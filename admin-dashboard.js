@@ -979,28 +979,6 @@ document.addEventListener('DOMContentLoaded', () => {
         env.VITE_SUPABASE_URL = env.VITE_SUPABASE_URL || localStorage.getItem('VITE_SUPABASE_URL') || '';
         env.VITE_SUPABASE_ANON_KEY = env.VITE_SUPABASE_ANON_KEY || localStorage.getItem('VITE_SUPABASE_ANON_KEY') || '';
 
-        // If keys are missing (e.g., fetch failed on file:// or https:// production domains), fallback prompt the administrator
-        if (!env.VITE_GOOGLE_MAPS_API_KEY) {
-            const key = prompt("Google Maps API Key not found. Please input your Google Maps API Key to load GIS:");
-            if (key) {
-                localStorage.setItem('VITE_GOOGLE_MAPS_API_KEY', key);
-                env.VITE_GOOGLE_MAPS_API_KEY = key;
-            }
-        }
-        if (!env.VITE_SUPABASE_URL) {
-            const url = prompt("Supabase URL not found. Please enter your Supabase URL (or click Cancel for Local storage mode):");
-            if (url) {
-                localStorage.setItem('VITE_SUPABASE_URL', url);
-                env.VITE_SUPABASE_URL = url;
-            }
-        }
-        if (!env.VITE_SUPABASE_ANON_KEY && env.VITE_SUPABASE_URL) {
-            const anon = prompt("Please enter your Supabase Anon Key:");
-            if (anon) {
-                localStorage.setItem('VITE_SUPABASE_ANON_KEY', anon);
-                env.VITE_SUPABASE_ANON_KEY = anon;
-            }
-        }
         return env;
     }
 

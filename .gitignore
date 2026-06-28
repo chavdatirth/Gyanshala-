@@ -1,6 +1,3 @@
-# Local environment config
-.env
-
 # OS files
 .DS_Store
 Thumbs.db
