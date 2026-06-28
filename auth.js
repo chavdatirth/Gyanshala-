@@ -345,12 +345,149 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // GOOGLE AUTHENTICATION REDIRECT
+    // OFFICIAL GOOGLE SIGN-IN ON LOGIN PAGE
     // ==========================================
-    if (googleBtn) {
-        googleBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.location.href = 'google-login.html';
+    let googleTempUser = null;
+
+    // Decode JWT helper
+    function decodeJwt(token) {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+    }
+
+    // Google Credential Callback
+    window.handleGoogleLoginResponse = function(response) {
+        try {
+            const payload = decodeJwt(response.credential);
+            console.log("Real Google Profile:", payload);
+
+            googleTempUser = {
+                id: 'USER-G-' + Date.now(),
+                fullName: payload.name,
+                email: payload.email,
+                mobile: '9876543210',
+                dob: '1995-01-01',
+                gender: 'Male',
+                address: '',
+                area: '',
+                city: 'Ahmedabad',
+                state: 'Gujarat',
+                pincode: '',
+                picture: payload.picture || '',
+                approved: true
+            };
+
+            // Show the role selection modal overlay
+            if (googleRoleModal) {
+                googleRoleModal.classList.add('active');
+            } else {
+                alert('Role selector modal missing.');
+            }
+
+        } catch (e) {
+            console.error("Google login callback error:", e);
+            alert("Google Sign-In response decoding failed.");
+        }
+    };
+
+    async function initPageGoogleSignIn() {
+        if (document.getElementById('google-btn-container')) {
+            // Load environment variables
+            let clientID = '510621809360-hpj4i8b8i0mo10ua602rblnndl6f06gl.apps.googleusercontent.com';
+            try {
+                const res = await fetch('.env');
+                if (res.ok) {
+                    const text = await res.text();
+                    text.split('\n').forEach(line => {
+                        const parts = line.split('=');
+                        if (parts.length >= 2 && parts[0].trim() === 'VITE_GOOGLE_CLIENT_ID') {
+                            clientID = parts.slice(1).join('=').trim().replace(/^['"]|['"]$/g, '');
+                        }
+                    });
+                }
+            } catch (e) {
+                console.warn('Skipped reading .env clientID, using default.');
+            }
+
+            if (typeof google !== 'undefined') {
+                google.accounts.id.initialize({
+                    client_id: clientID,
+                    callback: window.handleGoogleLoginResponse,
+                    auto_select: true
+                });
+                google.accounts.id.renderButton(
+                    document.getElementById("google-btn-container"),
+                    { theme: "outline", size: "large", width: 370 }
+                );
+                google.accounts.id.prompt();
+            }
+        }
+    }
+
+    // Modal Action Listeners
+    if (modalCancelBtn) {
+        modalCancelBtn.addEventListener('click', () => {
+            if (googleRoleModal) googleRoleModal.classList.remove('active');
+            googleTempUser = null;
         });
     }
+
+    if (modalContinueBtn) {
+        modalContinueBtn.addEventListener('click', () => {
+            const selectedRadio = document.querySelector('input[name="google-role"]:checked');
+            
+            if (!selectedRadio) {
+                alert('Please select exactly one role before continuing.');
+                return;
+            }
+            if (!googleTempUser) {
+                alert('Credentials lost. Please sign in again.');
+                return;
+            }
+
+            const chosenRole = selectedRadio.value;
+            googleTempUser.role = chosenRole;
+
+            // Save user in local users database
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            let userObj = users.find(u => u.email.toLowerCase() === googleTempUser.email.toLowerCase());
+            
+            if (!userObj) {
+                userObj = googleTempUser;
+                users.push(userObj);
+                localStorage.setItem('users', JSON.stringify(users));
+            } else {
+                userObj.role = chosenRole;
+                if (googleTempUser.picture) {
+                    userObj.picture = googleTempUser.picture;
+                }
+                localStorage.setItem('users', JSON.stringify(users));
+            }
+
+            localStorage.setItem('currentUser', JSON.stringify(userObj));
+            if (googleRoleModal) googleRoleModal.classList.remove('active');
+
+            alert(`Logged in with Google as ${userObj.fullName}!`);
+
+            // Route to correct dashboard
+            if (chosenRole === 'main_office') {
+                window.location.href = 'admin-dashboard.html';
+            } else if (chosenRole === 'supervisor') {
+                window.location.href = 'dashboard.html';
+            } else if (chosenRole === 'teacher') {
+                window.location.href = 'teacher-dashboard.html';
+            } else if (chosenRole === 'volunteer') {
+                window.location.href = 'volunteer-dashboard.html';
+            }
+        });
+    }
+
+    // Trigger after DOM loaded & SDK ready
+    setTimeout(() => {
+        initPageGoogleSignIn();
+    }, 500);
 });
