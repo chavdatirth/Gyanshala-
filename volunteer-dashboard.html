@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gyanshala Volunteer Dashboard</title>
+    <link rel="stylesheet" href="volunteer-dashboard.css">
+    <link rel="stylesheet" href="dashboard-extension.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="app-container">
+    
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header" id="menu-toggle" style="cursor: pointer;">
+            <span class="material-symbols-rounded text-primary" style="font-size: 32px;">school</span>
+            <h2>Gyanshala</h2>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-target="home">
+                <span class="material-symbols-rounded">dashboard</span> <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" data-target="centers">
+                <span class="material-symbols-rounded">corporate_fare</span> <span>Assigned Centers</span>
+            </a>
+            <a href="#" class="nav-item" data-target="schedule">
+                <span class="material-symbols-rounded">schedule</span> <span>Activity Schedule</span>
+            </a>
+            <a href="#" class="nav-item" data-target="attendance">
+                <span class="material-symbols-rounded">event_available</span> <span>Attendance</span>
+            </a>
+            <a href="#" class="nav-item" data-target="submitreport">
+                <span class="material-symbols-rounded">assignment</span> <span>Submit Report</span>
+            </a>
+            <a href="#" class="nav-item" data-target="photos">
+                <span class="material-symbols-rounded">photo_library</span> <span>Upload Photos</span>
+            </a>
+            <a href="#" class="nav-item" data-target="hours">
+                <span class="material-symbols-rounded">hourglass</span> <span>Volunteer Hours</span>
+            </a>
+            <a href="#" class="nav-item" data-target="messages">
+                <span class="material-symbols-rounded">chat</span> <span>Messages</span>
+            </a>
+            <a href="#" class="nav-item" data-target="profile">
+                <span class="material-symbols-rounded">person</span> <span>Profile</span>
+            </a>
+            <a href="#" class="nav-item" data-target="settings">
+                <span class="material-symbols-rounded">settings</span> <span>Settings</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="logout-btn">
+                <span class="material-symbols-rounded">logout</span> <span>Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        
+        <!-- Top App Bar -->
+        <header class="top-app-bar">
+            <div class="top-bar-left">
+                <div class="logo-section">
+                    <h1>Volunteer Dashboard</h1>
+                </div>
+                <div class="search-bar">
+                    <span class="material-symbols-rounded">search</span>
+                    <input type="text" placeholder="Search activities..." />
+                </div>
+            </div>
+            
+            <div class="top-bar-right">
+                <div class="current-date" id="current-date" style="font-size:0.85rem; font-weight:500;"></div>
+                
+                <button class="icon-btn" id="notification-btn">
+                    <span class="material-symbols-rounded">notifications</span>
+                    <span class="badge-dot" style="display: none;"></span>
+                </button>
+                
+                <div class="avatar">V</div>
+            </div>
+        </header>
+
+        <!-- Dynamic Views -->
+        
+        <!-- 1. Home View -->
+        <section id="view-home" class="page-view active">
+            <div class="glass-card internship-profile-card">
+                <div>
+                    <h3 id="profile-summary-name">Zenish Patel</h3>
+                    <p style="color:var(--text-body); font-size:0.9rem;" id="profile-summary-id"></p>
+                    <p style="margin-top: 8px;"><strong>College:</strong> <span id="profile-summary-college"></span></p>
+                    <p><strong>University:</strong> <span id="profile-summary-university"></span></p>
+                </div>
+                <div style="margin-left: auto;">
+                    <p><strong>Internship:</strong> Societal Internship</p>
+                    <p><strong>Organization:</strong> Gyan Shala NGO</p>
+                    <p><strong>Supervisor:</strong> <span id="profile-summary-sup"></span></p>
+                </div>
+            </div>
+
+            <div class="grid-stats">
+                <div class="glass-card kpi-card">
+                    <div class="kpi-header"><span class="kpi-icon"><span class="material-symbols-rounded">corporate_fare</span></span></div>
+                    <div class="kpi-value"><h3 id="kpi-centers">0</h3><p>Assigned Centers</p></div>
+                </div>
+                <div class="glass-card kpi-card">
+                    <div class="kpi-header"><span class="kpi-icon"><span class="material-symbols-rounded">groups</span></span></div>
+                    <div class="kpi-value"><h3 id="kpi-students">0</h3><p>Students Taught</p></div>
+                </div>
+                <div class="glass-card kpi-card">
+                    <div class="kpi-header"><span class="kpi-icon"><span class="material-symbols-rounded">schedule</span></span></div>
+                    <div class="kpi-value"><h3 id="kpi-hours">0 Hours</h3><p>Volunteer Hours</p></div>
+                </div>
+                <div class="glass-card kpi-card">
+                    <div class="kpi-header"><span class="kpi-icon"><span class="material-symbols-rounded">photo_library</span></span></div>
+                    <div class="kpi-value"><h3 id="kpi-photos">0</h3><p>Uploaded Photos</p></div>
+                </div>
+                <div class="glass-card kpi-card">
+                    <div class="kpi-header"><span class="kpi-icon"><span class="material-symbols-rounded">assignment</span></span></div>
+                    <div class="kpi-value"><h3 id="kpi-reports">0</h3><p>Filed Reports</p></div>
+                </div>
+            </div>
+
+            <!-- Splits: Recent Activities & Announcements -->
+            <div class="grid-split">
+                <div class="glass-card">
+                    <h4>Internship Achievements</h4>
+                    <div class="list-container">
+                        <div class="list-item"><div class="list-item-icon">⭐</div><div><strong>Best Activity Report Award</strong><p style="margin:0; font-size:0.75rem;">Awarded by Supervisor Priya Shah</p></div></div>
+                        <div class="list-item"><div class="list-item-icon">🏆</div><div><strong>100+ Students Assisted</strong><p style="margin:0; font-size:0.75rem;">Milestone reached in first week</p></div></div>
+                    </div>
+                </div>
+                <div class="glass-card">
+                    <h4>NGO Announcements</h4>
+                    <div class="list-container">
+                        <div style="padding:10px; background:rgba(37,99,235,0.05); border-left:3px solid var(--primary); border-radius:4px;">
+                            <h5 style="margin:0; font-size:0.85rem; color:var(--text-dark);">Tree plantation drive this Friday</h5>
+                            <p style="margin:4px 0 0 0; font-size:0.75rem; color:var(--text-body);">Please coordinate with center teachers.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Assigned Centers View -->
+        <section id="view-centers" class="page-view">
+            <h2>Assigned Learning Centers</h2>
+            <div class="glass-card table-container" style="margin-top:20px;">
+                <table class="data-table">
+                    <thead><tr><th>Center Name</th><th>Teacher Incharge</th><th>Total Students</th><th>Visit Schedule</th><th>Status</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 3. Activity Schedule View -->
+        <section id="view-schedule" class="page-view">
+            <h2>Weekly Activity Schedule</h2>
+            <div class="glass-card table-container" style="margin-top:20px;">
+                <table class="data-table">
+                    <thead><tr><th>Day</th><th>Assigned Center</th><th>Scheduled Activities</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 4. Attendance Log View -->
+        <section id="view-attendance" class="page-view">
+            <div class="flex-between">
+                <h2>Attendance & Working Hours Log</h2>
+                <button class="btn-primary" id="log-hours">Log Working Hours</button>
+            </div>
+            <div class="glass-card table-container" style="margin-top:20px;">
+                <table class="data-table">
+                    <thead><tr><th>Date</th><th>Working Hours</th><th>Internship Status</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 5. Submit Activity Report View -->
+        <section id="view-submitreport" class="page-view">
+            <h2>Submit Daily Activity Report</h2>
+            <div class="glass-card" style="margin-top:20px;">
+                <form id="activity-report-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Activity Date *</label>
+                            <input type="text" id="act-date" class="form-control" placeholder="08 Jul" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Learning Center *</label>
+                            <select id="act-center" class="form-control" required>
+                                <option>Bapunagar Center</option>
+                                <option>Naroda Center</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Activity Topic *</label>
+                            <input type="text" id="act-topic" class="form-control" placeholder="Math Flashcards / English Reading" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Students Present *</label>
+                            <input type="number" id="act-present" class="form-control" placeholder="40" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Remarks / Observations</label>
+                            <input type="text" id="act-remarks" class="form-control" placeholder="Good participation. Math skills improving.">
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">Submit Report</button>
+                        <button type="reset" class="btn-outline">Reset Form</button>
+                    </div>
+                </form>
+            </div>
+
+            <h3 style="margin-top: 32px;">Submitted Reports History</h3>
+            <div class="glass-card table-container" style="margin-top:16px;">
+                <table class="data-table" id="activity-history-table">
+                    <thead><tr><th>Date</th><th>Center</th><th>Topic</th><th>Present</th><th>Remarks</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 6. Upload Photos View -->
+        <section id="view-photos" class="page-view">
+            <div class="flex-between">
+                <h2>Societal Internship Photo Portfolio</h2>
+                <div style="position:relative;">
+                    <input type="file" id="photo-upload-input" style="position:absolute; width:100%; height:100%; opacity:0; cursor:pointer;">
+                    <button class="btn-primary">+ Upload New Photo</button>
+                </div>
+            </div>
+            
+            <div class="gallery-grid" id="gallery-container"></div>
+        </section>
+
+        <!-- 7. Volunteer Hours View -->
+        <section id="view-hours" class="page-view">
+            <h2>Internship Volunteer Hours Target</h2>
+            <div class="grid-split" style="margin-top:20px;">
+                <div class="glass-card kpi-card" style="align-items:center; justify-content:center; text-align:center;">
+                    <h4>Total Target Hours</h4>
+                    <h3>160 Hours</h3>
+                    <p style="margin-top:20px; font-size:0.85rem; color:var(--text-body);">GTU Societal Internship requires 160 completed volunteer hours for societal certification.</p>
+                </div>
+                <div class="glass-card kpi-card" style="align-items:center; justify-content:center; text-align:center;">
+                    <h4>Hours Completed</h4>
+                    <h3 id="hours-completed-value" style="color:var(--secondary);">0 Hours</h3>
+                    <h4 style="margin-top:12px; font-size:0.85rem; color:var(--text-body);">Hours Remaining</h4>
+                    <h3 id="hours-remaining-value" style="color:var(--primary);">0 Hours</h3>
+                </div>
+            </div>
+            <div class="glass-card">
+                <h4>Hours Distribution Graph</h4>
+                <div class="chart-box" style="height:250px;"><canvas id="hoursDistributionChart"></canvas></div>
+            </div>
+        </section>
+
+        <!-- 8. Messages View -->
+        <section id="view-messages" class="page-view">
+            <h2>Internship Communications Console</h2>
+            <div class="chat-layout" style="margin-top:20px;">
+                <div class="chat-sidebar">
+                    <div class="chat-search"><input type="text" placeholder="Search chats..." style="width:100%; padding:8px; border:1px solid var(--border); border-radius:8px;"></div>
+                    <div class="chat-list"></div>
+                </div>
+                <div class="chat-window">
+                    <div class="chat-header">
+                        <div class="avatar">P</div>
+                        <div><h3 style="margin:0; font-size:1rem;">Priya Shah</h3><small class="text-body">Supervisor</small></div>
+                    </div>
+                    <div class="chat-messages"></div>
+                    <div class="chat-input">
+                        <input type="text" placeholder="Type message...">
+                        <button class="icon-btn" style="background:var(--primary); color:white;"><span class="material-symbols-rounded">send</span></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 9. Profile View -->
+        <section id="view-profile" class="page-view">
+            <h2>Zenish Patel Internship Profile</h2>
+            <div class="glass-card profile-card" style="margin-top:20px;">
+                <div class="profile-large-avatar">ZP</div>
+                <h2>Zenish Patel</h2>
+                <span class="badge badge-active" style="margin-bottom:20px;">Societal Internship Volunteer</span>
+                <div style="text-align:left; border-top:1px solid var(--border); padding-top:20px;">
+                    <div class="info-row" style="margin-bottom:12px;"><span class="label">Volunteer ID:</span> <span class="value" style="font-weight:600; color:var(--text-dark);"></span></div>
+                    <div class="info-row" style="margin-bottom:12px;"><span class="label">College:</span> <span class="value" style="font-weight:600; color:var(--text-dark);"></span></div>
+                    <div class="info-row" style="margin-bottom:12px;"><span class="label">University:</span> <span class="value" style="font-weight:600; color:var(--text-dark);"></span></div>
+                    <div class="info-row" style="margin-bottom:12px;"><span class="label">Supervisor:</span> <span class="value" style="font-weight:600; color:var(--text-dark);"></span></div>
+                    <div class="info-row"><span class="label">Duration:</span> <span class="value" style="font-weight:600; color:var(--text-dark);"></span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 10. Settings View -->
+        <section id="view-settings" class="page-view">
+            <h2>Preferences & General Settings</h2>
+            <div class="glass-card" style="max-width:600px; margin-top:20px;">
+                <div class="flex-between">
+                    <div>
+                        <h4 style="margin:0;">Theme Selector (Dark Mode)</h4>
+                        <p style="margin:0; font-size:0.8rem; color:var(--text-body);">Enable high contrast dark theme</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="dark-theme-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </section>
+        
+    </div>
+</div>
+
+<!-- Notification Panel Drawer -->
+<div id="notification-panel" class="notification-panel">
+    <div class="panel-header">
+        <h3>Notifications</h3>
+        <button class="icon-btn" id="close-panel"><span class="material-symbols-rounded">close</span></button>
+    </div>
+    <div class="panel-content">
+        <!-- Render notifications dynamically -->
+    </div>
+</div>
+
+<script src="volunteer-dashboard.js"></script>
+</body>
+</html>

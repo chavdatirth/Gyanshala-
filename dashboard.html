@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gyanshala Supervisor Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="dashboard-extension.css">
+</head>
+<body>
+
+<div class="app-container">
+    
+    <!-- Persistent Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <span class="material-symbols-rounded text-primary" style="font-size: 32px;">school</span>
+            <h2>Gyanshala</h2>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-target="home">
+                <span class="material-symbols-rounded">dashboard</span> Dashboard
+            </a>
+            <a href="#" class="nav-item" data-target="centers">
+                <span class="material-symbols-rounded">corporate_fare</span> Assigned Centers
+            </a>
+            <a href="#" class="nav-item" data-target="teachers">
+                <span class="material-symbols-rounded">cast_for_education</span> Teacher Monitoring
+            </a>
+            <a href="#" class="nav-item" data-target="alerts">
+                <span class="material-symbols-rounded">warning</span> Dropout Alerts
+            </a>
+            <a href="#" class="nav-item" data-target="students">
+                <span class="material-symbols-rounded">groups</span> Student Overview
+            </a>
+            <a href="#" class="nav-item" data-target="attendance">
+                <span class="material-symbols-rounded">fact_check</span> Attendance Verification
+            </a>
+            <a href="#" class="nav-item" data-target="visits">
+                <span class="material-symbols-rounded">map</span> Center Visit Reports
+            </a>
+            <a href="#" class="nav-item" data-target="resources">
+                <span class="material-symbols-rounded">inventory_2</span> Resource Requests
+            </a>
+            <a href="#" class="nav-item" data-target="messages">
+                <span class="material-symbols-rounded">chat</span> Messages
+            </a>
+            <a href="#" class="nav-item" data-target="reports">
+                <span class="material-symbols-rounded">bar_chart</span> Reports
+            </a>
+            <a href="#" class="nav-item" data-target="profile">
+                <span class="material-symbols-rounded">person</span> Profile
+            </a>
+            <a href="#" class="nav-item" data-target="settings">
+                <span class="material-symbols-rounded">settings</span> Settings
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="logout-btn" onclick="window.location.href='login.html'">
+                <span class="material-symbols-rounded" style="vertical-align: middle;">logout</span> Logout
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        
+        <!-- Persistent Top App Bar -->
+        <header class="top-app-bar">
+            <div class="welcome-msg">
+                <span class="greeting">Good Morning,</span>
+                <h3>Rajesh Patel</h3>
+                <span class="role-badge">Supervisor</span>
+            </div>
+            
+            <div class="top-bar-right">
+                <div class="search-bar">
+                    <span class="material-symbols-rounded">search</span>
+                    <input type="text" placeholder="Search centers, teachers..." />
+                </div>
+                
+                <div class="current-date">
+                    <span class="material-symbols-rounded">calendar_today</span>
+                    <span id="current-date"></span>
+                </div>
+                
+                <button id="notification-btn" class="icon-btn">
+                    <span class="material-symbols-rounded">notifications</span>
+                    <span class="badge-dot"></span>
+                </button>
+                
+                <div class="avatar">RP</div>
+            </div>
+        </header>
+
+        <!-- VIEWS -->
+        
+        <!-- 1. Home View -->
+        <section id="view-home" class="page-view active">
+            <div class="flex-between" style="margin-bottom: 24px;">
+                <h2>Dashboard Overview</h2>
+                <button class="btn-outline flex-start">
+                    <span class="material-symbols-rounded">download</span> Export Report
+                </button>
+            </div>
+
+            <div class="grid-stats">
+                <div class="glass-card stat-card">
+                    <div class="stat-card-header">
+                        <div class="stat-icon-wrapper text-primary-bg"><span class="material-symbols-rounded text-primary">corporate_fare</span></div>
+                        <div class="stat-growth text-success"><span class="material-symbols-rounded">trending_up</span>+2</div>
+                    </div>
+                    <div class="stat-card-body"><h3>18</h3><p>Assigned Centers</p></div>
+                </div>
+                
+                <div class="glass-card stat-card">
+                    <div class="stat-card-header">
+                        <div class="stat-icon-wrapper text-secondary-bg"><span class="material-symbols-rounded text-secondary">cast_for_education</span></div>
+                        <div class="stat-growth text-success"><span class="material-symbols-rounded">trending_up</span>+5</div>
+                    </div>
+                    <div class="stat-card-body"><h3>54</h3><p>Teachers</p></div>
+                </div>
+                
+                <div class="glass-card stat-card">
+                    <div class="stat-card-header">
+                        <div class="stat-icon-wrapper text-success-bg"><span class="material-symbols-rounded text-success">groups</span></div>
+                        <div class="stat-growth text-success"><span class="material-symbols-rounded">trending_up</span>+120</div>
+                    </div>
+                    <div class="stat-card-body"><h3>2,438</h3><p>Students</p></div>
+                </div>
+                
+                <div class="glass-card stat-card">
+                    <div class="stat-card-header">
+                        <div class="stat-icon-wrapper text-primary-bg"><span class="material-symbols-rounded text-primary">fact_check</span></div>
+                        <div class="stat-growth text-success"><span class="material-symbols-rounded">trending_up</span>+2.4%</div>
+                    </div>
+                    <div class="stat-card-body"><h3>91%</h3><p>Today's Attendance</p></div>
+                </div>
+            </div>
+
+            <h2 style="margin-top: 48px; margin-bottom: 24px;">Center Performance Overview</h2>
+            <div class="grid-cards">
+                <div class="glass-card center-card">
+                    <div class="center-card-header">
+                        <div>
+                            <h3>Sunrise Center</h3>
+                            <p class="address"><span class="material-symbols-rounded" style="font-size: 16px;">location_on</span> North Slum Zone A</p>
+                        </div>
+                        <span class="badge badge-success">Excellent</span>
+                    </div>
+                    <div class="info-row"><span class="label">Coordinator:</span> <span class="value">Meera Sharma</span></div>
+                    <div class="metrics-grid">
+                        <div class="metric"><span class="material-symbols-rounded text-primary">person</span><div><strong>4</strong><small>Teachers</small></div></div>
+                        <div class="metric"><span class="material-symbols-rounded text-secondary">groups</span><div><strong>180</strong><small>Students</small></div></div>
+                        <div class="metric"><span class="material-symbols-rounded text-success">fact_check</span><div><strong>94%</strong><small>Attendance</small></div></div>
+                        <div class="metric"><span class="material-symbols-rounded text-warning">analytics</span><div><strong>88%</strong><small>Performance</small></div></div>
+                    </div>
+                </div>
+
+                <div class="glass-card center-card">
+                    <div class="center-card-header">
+                        <div>
+                            <h3>Hope Hub</h3>
+                            <p class="address"><span class="material-symbols-rounded" style="font-size: 16px;">location_on</span> East District, Block B</p>
+                        </div>
+                        <span class="badge badge-primary">Good</span>
+                    </div>
+                    <div class="info-row"><span class="label">Coordinator:</span> <span class="value">Vikram Singh</span></div>
+                    <div class="metrics-grid">
+                        <div class="metric"><span class="material-symbols-rounded text-primary">person</span><div><strong>3</strong><small>Teachers</small></div></div>
+                        <div class="metric"><span class="material-symbols-rounded text-secondary">groups</span><div><strong>145</strong><small>Students</small></div></div>
+                        <div class="metric"><span class="material-symbols-rounded text-success">fact_check</span><div><strong>89%</strong><small>Attendance</small></div></div>
+                        <div class="metric"><span class="material-symbols-rounded text-warning">analytics</span><div><strong>82%</strong><small>Performance</small></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Teacher Monitoring View -->
+        <section id="view-teachers" class="page-view">
+            <div class="flex-between" style="margin-bottom: 24px;">
+                <h2>Teacher Monitoring</h2>
+            </div>
+            
+            <div class="glass-card table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Teacher Name</th>
+                            <th>Center</th>
+                            <th>Attendance %</th>
+                            <th>Classes</th>
+                            <th>Last Login</th>
+                            <th>Performance</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="teacher-row" data-name="Anjali Desai" data-center="Sunrise Center">
+                            <td class="flex-start"><div class="avatar-small">A</div><strong>Anjali Desai</strong></td>
+                            <td>Sunrise Center</td>
+                            <td><span class="text-success">98%</span></td>
+                            <td>42</td>
+                            <td>2 hours ago</td>
+                            <td>9.2 / 10</td>
+                            <td><button class="icon-btn"><span class="material-symbols-rounded">visibility</span></button></td>
+                        </tr>
+                        <tr class="teacher-row" data-name="Vikram Singh" data-center="Hope Hub">
+                            <td class="flex-start"><div class="avatar-small">V</div><strong>Vikram Singh</strong></td>
+                            <td>Hope Hub</td>
+                            <td><span class="text-success">92%</span></td>
+                            <td>38</td>
+                            <td>Yesterday</td>
+                            <td>8.5 / 10</td>
+                            <td><button class="icon-btn"><span class="material-symbols-rounded">visibility</span></button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 3. Dropout Alerts View -->
+        <section id="view-alerts" class="page-view">
+            <h2 style="margin-bottom: 24px;">Dropout Alerts</h2>
+            <div style="max-width: 800px;">
+                <div class="glass-card alert-card risk-high">
+                    <div class="alert-header flex-between">
+                        <div class="flex-start"><span class="material-symbols-rounded risk-icon">error</span>
+                            <div><h3>Rahul Verma</h3><p class="subtitle">Sunrise Center</p></div>
+                        </div>
+                        <span class="badge badge-risk">High Risk</span>
+                    </div>
+                    <div class="alert-body">
+                        <div class="info-grid">
+                            <div><small>Attendance</small><strong>45%</strong></div>
+                            <div><small>Guardian Contact</small><strong>+91 98765 43210</strong></div>
+                        </div>
+                        <div class="reason-box">
+                            <small>Alert Reason:</small>
+                            <p>Absent for 5 consecutive days without prior notice.</p>
+                        </div>
+                    </div>
+                    <div class="alert-actions">
+                        <button class="btn-action"><span class="material-symbols-rounded">call</span> Call Parent</button>
+                    </div>
+                </div>
+                
+                <div class="glass-card alert-card risk-medium">
+                    <div class="alert-header flex-between">
+                        <div class="flex-start"><span class="material-symbols-rounded risk-icon">warning</span>
+                            <div><h3>Sita Kumari</h3><p class="subtitle">Hope Hub</p></div>
+                        </div>
+                        <span class="badge badge-risk">Medium Risk</span>
+                    </div>
+                    <div class="alert-body">
+                        <div class="info-grid">
+                            <div><small>Attendance</small><strong>62%</strong></div>
+                            <div><small>Guardian Contact</small><strong>+91 91234 56789</strong></div>
+                        </div>
+                        <div class="reason-box">
+                            <small>Alert Reason:</small>
+                            <p>Irregular attendance. Mother reported child is sick.</p>
+                        </div>
+                    </div>
+                    <div class="alert-actions">
+                        <button class="btn-action"><span class="material-symbols-rounded">chat</span> Message Teacher</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Interactive Map View -->
+        <section id="view-centers" class="page-view">
+            <div class="flex-between" style="margin-bottom: 24px;">
+                <h2>Interactive Center Map</h2>
+                <div class="flex-start" style="background: var(--surface); padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border);">
+                    <span style="display:flex; gap:6px; align-items:center;"><span class="dot dot-healthy"></span> Healthy</span>
+                    <span style="display:flex; gap:6px; align-items:center;"><span class="dot dot-critical"></span> Critical</span>
+                </div>
+            </div>
+            
+            <div class="glass-card map-container" style="flex: 1; min-height: 400px;">
+                <div class="map-background">
+                    <!-- Sunrise Center -->
+                    <div class="map-marker marker-healthy" style="top: 30%; left: 40%;">
+                        <div class="marker-pin"></div><div class="marker-pulse"></div>
+                        <div class="marker-tooltip"><strong>Sunrise Center</strong><small class="status-text text-success">HEALTHY</small></div>
+                    </div>
+                    
+                    <!-- Hope Hub -->
+                    <div class="map-marker marker-critical" style="top: 50%; left: 60%;">
+                        <div class="marker-pin"></div><div class="marker-pulse"></div>
+                        <div class="marker-tooltip"><strong>Hope Hub</strong><small class="status-text text-danger">CRITICAL</small></div>
+                    </div>
+                    
+                    <!-- Bright Future -->
+                    <div class="map-marker marker-needs-visit" style="top: 70%; left: 30%;">
+                        <div class="marker-pin"></div><div class="marker-pulse"></div>
+                        <div class="marker-tooltip"><strong>Bright Future</strong><small class="status-text text-warning">NEEDS VISIT</small></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 5. Student Overview View -->
+        <section id="view-students" class="page-view">
+            <div class="flex-between" style="margin-bottom: 24px;">
+                <h2>Student Overview</h2>
+                <button class="btn-primary">Add Student</button>
+            </div>
+            
+            <div class="grid-stats">
+                <div class="glass-card stat-card"><div class="stat-card-body"><h3>2,438</h3><p>Total Students</p></div></div>
+                <div class="glass-card stat-card"><div class="stat-card-body"><h3>1,250</h3><p>Boys</p></div></div>
+                <div class="glass-card stat-card"><div class="stat-card-body"><h3>1,188</h3><p>Girls</p></div></div>
+                <div class="glass-card stat-card"><div class="stat-card-body"><h3>12</h3><p class="text-danger">Dropout Risk</p></div></div>
+            </div>
+
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <span class="material-symbols-rounded">filter_list</span>
+                    <select><option>All Centers</option><option>Sunrise Center</option></select>
+                </div>
+                <div class="filter-group">
+                    <select><option>All Classes</option><option>Std 1</option></select>
+                </div>
+                <div class="filter-group">
+                    <select><option>Gender</option><option>Boys</option></select>
+                </div>
+            </div>
+
+            <div class="glass-card table-container">
+                <table class="data-table">
+                    <thead><tr><th>Name</th><th>Roll No</th><th>Center</th><th>Attendance %</th><th>Guardian</th><th>Status</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Ravi Kumar</strong></td><td>1042</td><td>Sunrise Center</td><td><span class="text-danger">45%</span></td><td>+91 98765 43210</td><td><span class="badge badge-danger">At Risk</span></td></tr>
+                        <tr><td><strong>Sneha Patel</strong></td><td>1043</td><td>Hope Hub</td><td><span class="text-success">98%</span></td><td>+91 91234 56789</td><td><span class="badge badge-success">Active</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 6. Attendance Verification View -->
+        <section id="view-attendance" class="page-view">
+            <h2>Attendance Verification</h2>
+            <div class="grid-cards" style="margin-top:24px;">
+                <div class="glass-card">
+                    <div class="flex-between" style="border-bottom: 1px solid var(--border); padding-bottom:12px; margin-bottom:12px;">
+                        <div><h3>Sunrise Center</h3><p class="text-body">12 May 2026</p></div>
+                        <span class="badge badge-warning">Pending Review</span>
+                    </div>
+                    <div class="info-row"><span class="label">Submitted by:</span><span class="value">Meera Sharma</span></div>
+                    <div class="info-row"><span class="label">Present:</span><span class="value text-success">170/180 (94%)</span></div>
+                    <div class="flex-start" style="margin-top:16px;">
+                        <button class="btn-primary">Approve</button>
+                        <button class="btn-outline" style="color:var(--danger); border-color:var(--danger);">Reject</button>
+                    </div>
+                </div>
+            </div>
+            
+            <h3 style="margin-top: 48px;">Monthly Heatmap (Mock)</h3>
+            <div class="chart-placeholder" style="height: 300px;">
+                <span class="material-symbols-rounded" style="font-size: 48px;">calendar_month</span>
+                <p>Interactive calendar heatmap will render here</p>
+            </div>
+        </section>
+
+        <!-- 7. Center Visit Reports View -->
+        <section id="view-visits" class="page-view">
+            <div class="flex-between" style="margin-bottom: 24px;">
+                <h2>Center Visit Reports</h2>
+                <button class="btn-primary">Schedule New Visit</button>
+            </div>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="flex-between">
+                            <h3>Sunrise Center Routine Check</h3>
+                            <span class="text-body">Yesterday, 10:00 AM</span>
+                        </div>
+                        <p class="text-body" style="margin: 8px 0;"><strong>Purpose:</strong> Monthly audit and teacher evaluation.</p>
+                        <p class="text-body" style="margin: 0 0 16px 0;"><strong>Issues Found:</strong> Roof leaking in Class 2 area.</p>
+                        <span class="badge badge-success">Report Submitted</span>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background: var(--warning);"></div>
+                    <div class="timeline-content">
+                        <div class="flex-between">
+                            <h3>Hope Hub Surprise Visit</h3>
+                            <span class="text-body">10 May 2026</span>
+                        </div>
+                        <p class="text-body" style="margin: 8px 0;"><strong>Purpose:</strong> Investigate attendance drops.</p>
+                        <p class="text-body" style="margin: 0 0 16px 0;"><strong>Action Taken:</strong> Met with 3 parents. Scheduled counseling.</p>
+                        <span class="badge badge-warning">Follow-up Required</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. Resource Requests View -->
+        <section id="view-resources" class="page-view">
+            <h2>Resource Requests</h2>
+            <div class="grid-cards" style="margin-top: 24px;">
+                <div class="glass-card" style="border-top: 4px solid var(--danger);">
+                    <div class="flex-between">
+                        <h3>New Textbooks (Std 1)</h3>
+                        <span class="badge badge-danger">High Priority</span>
+                    </div>
+                    <div style="margin: 16px 0; color: var(--text-body);">
+                        <p><strong>Center:</strong> Hope Hub</p>
+                        <p><strong>By:</strong> Vikram Singh</p>
+                        <p><strong>Qty:</strong> 50 sets</p>
+                    </div>
+                    <div class="flex-start">
+                        <button class="btn-primary">Approve</button>
+                        <button class="btn-outline">Order</button>
+                    </div>
+                </div>
+                
+                <div class="glass-card" style="border-top: 4px solid var(--warning);">
+                    <div class="flex-between">
+                        <h3>Whiteboard Markers</h3>
+                        <span class="badge badge-warning">Medium Priority</span>
+                    </div>
+                    <div style="margin: 16px 0; color: var(--text-body);">
+                        <p><strong>Center:</strong> Sunrise Center</p>
+                        <p><strong>By:</strong> Meera Sharma</p>
+                        <p><strong>Qty:</strong> 10 boxes</p>
+                    </div>
+                    <div class="flex-start">
+                        <button class="btn-primary">Approve</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 9. Messages View -->
+        <section id="view-messages" class="page-view">
+            <h2>Messages</h2>
+            <div class="chat-layout">
+                <div class="chat-sidebar">
+                    <div class="chat-search"><input type="text" placeholder="Search chats..." style="width:100%; padding:8px; border:1px solid var(--border); border-radius:8px;"></div>
+                    <div class="chat-list">
+                        <div class="chat-item active">
+                            <div class="avatar-small">M</div>
+                            <div class="chat-item-info"><h4>Meera Sharma</h4><p>Can you approve the book req...</p></div>
+                            <span class="badge-dot" style="position:static; width:10px; height:10px;"></span>
+                        </div>
+                        <div class="chat-item">
+                            <div class="avatar-small" style="background:var(--success);">V</div>
+                            <div class="chat-item-info"><h4>Vikram Singh</h4><p>Thanks for visiting today!</p></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-window">
+                    <div class="chat-header">
+                        <div class="avatar-small">M</div>
+                        <div><h3 style="margin:0; font-size:1rem;">Meera Sharma</h3><small class="text-body">Online</small></div>
+                    </div>
+                    <div class="chat-messages">
+                        <div class="message-bubble message-received">Hi Sir, we ran out of Std 2 workbooks.</div>
+                        <div class="message-bubble message-sent">I saw the request. I will approve it by EOD.</div>
+                        <div class="message-bubble message-received">Can you approve the book request today? <br><small style="color:var(--primary);"><span class="material-symbols-rounded" style="font-size:14px;">description</span> Attached: Request_Form.pdf</small></div>
+                    </div>
+                    <div class="chat-input">
+                        <span class="material-symbols-rounded" style="cursor:pointer; color:var(--text-body);">attach_file</span>
+                        <input type="text" placeholder="Type a message..." style="flex:1; padding:12px; border:1px solid var(--border); border-radius:99px; outline:none;">
+                        <span class="material-symbols-rounded" style="cursor:pointer; color:var(--text-body);">mic</span>
+                        <button class="icon-btn" style="background:var(--primary); color:white;"><span class="material-symbols-rounded">send</span></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 10. Reports View -->
+        <section id="view-reports" class="page-view">
+            <div class="flex-between" style="margin-bottom: 24px;">
+                <h2>Generate Reports</h2>
+                <div class="flex-start">
+                    <button class="btn-outline">Export PDF</button>
+                    <button class="btn-primary" style="background:var(--success);">Export Excel</button>
+                </div>
+            </div>
+            <div class="grid-cards">
+                <div class="glass-card"><div class="chart-placeholder" style="height:250px;"><span class="material-symbols-rounded">bar_chart</span><p>Attendance Trends</p></div></div>
+                <div class="glass-card"><div class="chart-placeholder" style="height:250px;"><span class="material-symbols-rounded">pie_chart</span><p>Dropout Reasons</p></div></div>
+                <div class="glass-card" style="grid-column: 1 / -1;"><div class="chart-placeholder" style="height:300px;"><span class="material-symbols-rounded">show_chart</span><p>Performance vs Target</p></div></div>
+            </div>
+        </section>
+
+        <!-- 11. Profile View -->
+        <section id="view-profile" class="page-view">
+            <h2>Supervisor Profile</h2>
+            <div class="glass-card profile-card" style="max-width: 600px; margin: 24px auto;">
+                <div class="profile-large-avatar">RP</div>
+                <h2>Rajesh Patel</h2>
+                <span class="badge badge-primary">Senior Supervisor</span>
+                
+                <div style="width: 100%; text-align: left; margin-top: 32px;">
+                    <div class="info-row"><span class="label">Employee ID:</span><span class="value">GS-SUP-104</span></div>
+                    <div class="info-row"><span class="label">Email:</span><span class="value">rajesh.p@gyanshala.org</span></div>
+                    <div class="info-row"><span class="label">Phone:</span><span class="value">+91 98765 00000</span></div>
+                    <div class="info-row"><span class="label">Assigned District:</span><span class="value">Ahmedabad North</span></div>
+                </div>
+                
+                <div class="flex-between" style="width: 100%; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
+                    <button class="btn-outline">Upload Photo</button>
+                    <button class="btn-primary">Edit Profile</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 12. Settings View -->
+        <section id="view-settings" class="page-view">
+            <h2>Settings</h2>
+            <div class="glass-card" style="max-width: 800px; margin-top: 24px;">
+                <h3 style="border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 24px;">Preferences</h3>
+                
+                <div class="flex-between" style="margin-bottom: 24px;">
+                    <div><h4>Dark Mode</h4><p class="text-body" style="font-size:0.875rem;">Enable dark theme for the dashboard</p></div>
+                    <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                </div>
+                
+                <div class="flex-between" style="margin-bottom: 24px;">
+                    <div><h4>Email Alerts</h4><p class="text-body" style="font-size:0.875rem;">Receive critical dropout alerts via email</p></div>
+                    <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                </div>
+                
+                <div class="flex-between" style="margin-bottom: 32px;">
+                    <div><h4>SMS Notifications</h4><p class="text-body" style="font-size:0.875rem;">Get SMS for urgent resource requests</p></div>
+                    <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                </div>
+
+                <h3 style="border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 24px;">Security</h3>
+                <button class="btn-outline" style="margin-right: 16px;">Change Password</button>
+                <button class="btn-outline" style="color:var(--danger); border-color:var(--danger);">Logout from all devices</button>
+            </div>
+        </section>
+        
+    </div>
+</div>
+
+<!-- Floating Action Button -->
+<button class="fab" title="Quick Actions">
+    <span class="material-symbols-rounded">add</span>
+</button>
+
+<!-- Right Side Notification Panel -->
+<div id="notification-panel" class="notification-panel">
+    <div class="panel-header">
+        <h3 style="margin:0;">Notifications</h3>
+        <button id="close-panel" class="icon-btn"><span class="material-symbols-rounded">close</span></button>
+    </div>
+    <div class="panel-content">
+        <div style="padding: 12px; background: rgba(220, 38, 38, 0.05); border-left: 3px solid var(--danger); border-radius: 4px;">
+            <h4 style="margin:0; font-size:0.95rem;">Critical Dropout!</h4>
+            <p class="text-body" style="font-size:0.8rem; margin:4px 0 0 0;">Rahul Verma (Sunrise Center) absent 5 days.</p>
+        </div>
+        <div style="padding: 12px; background: rgba(245, 158, 11, 0.05); border-left: 3px solid var(--warning); border-radius: 4px;">
+            <h4 style="margin:0; font-size:0.95rem;">Pending Attendance</h4>
+            <p class="text-body" style="font-size:0.8rem; margin:4px 0 0 0;">Hope Hub attendance awaiting approval.</p>
+        </div>
+        <div style="padding: 12px; background: rgba(37, 99, 235, 0.05); border-left: 3px solid var(--primary); border-radius: 4px;">
+            <h4 style="margin:0; font-size:0.95rem;">New Message</h4>
+            <p class="text-body" style="font-size:0.8rem; margin:4px 0 0 0;">Meera Sharma requested textbooks.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Teacher Drawer (Hidden by default) -->
+<div id="drawer-overlay" class="drawer-overlay"></div>
+<div id="teacher-drawer" class="teacher-drawer">
+    <div class="drawer-header">
+        <h2>Teacher Profile</h2>
+        <button id="close-drawer" class="icon-btn"><span class="material-symbols-rounded">close</span></button>
+    </div>
+    
+    <div class="drawer-content">
+        <div class="profile-header">
+            <div id="drawer-avatar" class="profile-avatar">T</div>
+            <div>
+                <h3 id="drawer-name">Teacher Name</h3>
+                <p id="drawer-center">Center Name</p>
+            </div>
+            <button class="btn-outline" style="margin-left: auto;">Message</button>
+        </div>
+        
+        <div class="grid-2">
+            <div class="detail-box"><span class="label">Subjects</span><span class="value">Math, English</span></div>
+            <div class="detail-box"><span class="label">Experience</span><span class="value">3 Years</span></div>
+        </div>
+        
+        <div class="chart-placeholder"><span class="material-symbols-rounded">bar_chart</span><p>Attendance Graph (Last 30 Days)</p></div>
+        
+        <h4 style="margin-top: 24px;">Recent Activities</h4>
+        <ul class="activity-list">
+            <li><span class="material-symbols-rounded text-success">check_circle</span><div><p>Submitted Weekly Assessment</p><small>Today, 10:30 AM</small></div></li>
+            <li><span class="material-symbols-rounded text-primary">login</span><div><p>Logged into Gyanshala Portal</p><small>Today, 08:15 AM</small></div></li>
+        </ul>
+    </div>
+</div>
+
+<script src="dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gyan Shala Main Office Dashboard</title>
+    <link rel="stylesheet" href="admin-dashboard.css">
+    <link rel="stylesheet" href="dashboard-extension.css">
+    <!-- jsPDF and jsPDF-AutoTable CDNs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+    <!-- Supabase Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Google Maps MarkerClusterer -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-marker-clusterer/1.0.0/markerclusterer.js"></script>
+</head>
+<body>
+
+<div class="app-container">
+    
+    <!-- Collapsible Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header" id="menu-toggle" style="cursor: pointer;">
+            <span class="material-symbols-rounded text-primary" style="font-size: 32px;">school</span>
+            <h2>Gyan Shala</h2>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-target="home">
+                <span class="material-symbols-rounded">dashboard</span> <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" data-target="centers">
+                <span class="material-symbols-rounded">corporate_fare</span> <span>Learning Centers</span>
+            </a>
+            <a href="#" class="nav-item" data-target="students">
+                <span class="material-symbols-rounded">groups</span> <span>Students</span>
+            </a>
+            <a href="#" class="nav-item" data-target="teachers">
+                <span class="material-symbols-rounded">cast_for_education</span> <span>Teachers</span>
+            </a>
+            <a href="#" class="nav-item" data-target="supervisors">
+                <span class="material-symbols-rounded">supervisor_account</span> <span>Supervisors</span>
+            </a>
+            <a href="#" class="nav-item" data-target="volunteers">
+                <span class="material-symbols-rounded">volunteer_activism</span> <span>Volunteers</span>
+            </a>
+            <a href="#" class="nav-item" data-target="parents">
+                <span class="material-symbols-rounded">family_restroom</span> <span>Parents</span>
+            </a>
+            <a href="#" class="nav-item" data-target="attendance">
+                <span class="material-symbols-rounded">fact_check</span> <span>Attendance Reports</span>
+            </a>
+            <a href="#" class="nav-item" data-target="progress">
+                <span class="material-symbols-rounded">analytics</span> <span>Learning Progress</span>
+            </a>
+            <a href="#" class="nav-item" data-target="dropout">
+                <span class="material-symbols-rounded">warning</span> <span>Dropout Risk</span>
+            </a>
+            <a href="#" class="nav-item" data-target="resources">
+                <span class="material-symbols-rounded">inventory_2</span> <span>Resources</span>
+            </a>
+            <a href="#" class="nav-item" data-target="notifications">
+                <span class="material-symbols-rounded">notifications</span> <span>Notifications</span>
+            </a>
+            <a href="#" class="nav-item" data-target="reports">
+                <span class="material-symbols-rounded">article</span> <span>Reports</span>
+            </a>
+            <a href="#" class="nav-item" data-target="gismap">
+                <span class="material-symbols-rounded">map</span> <span>GIS Resource Map</span>
+            </a>
+            <a href="#" class="nav-item" data-target="chatbot">
+                <span class="material-symbols-rounded">chat</span> <span>Chatbot Logs</span>
+            </a>
+            <a href="#" class="nav-item" data-target="users">
+                <span class="material-symbols-rounded">manage_accounts</span> <span>User Management</span>
+            </a>
+            <a href="#" class="nav-item" data-target="settings">
+                <span class="material-symbols-rounded">settings</span> <span>Settings</span>
+            </a>
+            <a href="#" class="nav-item" data-target="profile">
+                <span class="material-symbols-rounded">person</span> <span>Profile</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="logout-btn">
+                <span class="material-symbols-rounded">logout</span> <span>Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Section -->
+    <div class="main-content">
+        
+        <!-- Top App Bar -->
+        <header class="top-app-bar">
+            <div class="top-bar-left">
+                <div class="logo-section">
+                    <h1>Main Office Admin</h1>
+                </div>
+                <div class="search-bar">
+                    <span class="material-symbols-rounded">search</span>
+                    <input type="text" placeholder="Search parameters..." />
+                </div>
+            </div>
+            
+            <div class="top-bar-right">
+                <div class="quick-actions-bar">
+                    <button class="btn-primary" id="quick-add-student">+ Student</button>
+                    <button class="btn-secondary" id="quick-add-teacher">+ Teacher</button>
+                </div>
+                
+                <div class="current-date" id="current-date" style="font-size:0.85rem; font-weight:500;"></div>
+                
+                <button class="icon-btn" id="notification-btn">
+                    <span class="material-symbols-rounded">notifications</span>
+                    <span class="badge-dot" style="display: none;"></span>
+                </button>
+                
+                <div class="avatar">AD</div>
+            </div>
+        </header>
+
+        <!-- Dynamic Views -->
+        
+        <!-- 1. Home View -->
+        <section id="view-home" class="page-view active">
+            <div class="flex-between" style="margin-bottom: 24px;">
+                <h2>Overview Dashboard</h2>
+            </div>
+            
+            <div class="grid-stats">
+                <div class="glass-card kpi-card">
+                    <div class="kpi-header"><span class="kpi-icon"><span class="material-symbols-rounded">corporate_fare</span></span><span class="kpi-trend">+1</span></div>
+                    <div class="kpi-value"><h3>3</h3><p>Learning Centers</p></div>
+                </div>
+                <div class="glass-card kpi-card">
+                    <div class="kpi-header"><span class="kpi-icon"><span class="material-symbols-rounded">groups</span></span><span class="kpi-trend">+12</span></div>
+                    <div class="kpi-value"><h3>0</h3><p>Total Students</p></div>
+                </div>
+                <div class="glass-card kpi-card">
+                    <div class="kpi-header"><span class="kpi-icon"><span class="material-symbols-rounded">cast_for_education</span></span><span class="kpi-trend">+2</span></div>
+                    <div class="kpi-value"><h3>0</h3><p>Active Teachers</p></div>
+                </div>
+                <div class="glass-card kpi-card">
+                    <div class="kpi-header"><span class="kpi-icon"><span class="material-symbols-rounded">volunteer_activism</span></span><span class="kpi-trend">+3</span></div>
+                    <div class="kpi-value"><h3>0</h3><p>Volunteers</p></div>
+                </div>
+                <div class="glass-card kpi-card">
+                    <div class="kpi-header"><span class="kpi-icon"><span class="material-symbols-rounded">warning</span></span><span class="kpi-trend down">-1</span></div>
+                    <div class="kpi-value"><h3>0</h3><p>At Risk Students</p></div>
+                </div>
+            </div>
+
+            <!-- Interactive Charts placeholders -->
+            <div class="grid-charts">
+                <div class="glass-card">
+                    <h4>Enrollment Trend</h4>
+                    <div class="chart-placeholder"><span class="material-symbols-rounded">show_chart</span><p>Dynamic Line Chart Widget</p></div>
+                </div>
+                <div class="glass-card">
+                    <h4>Attendance Heatmap Summary</h4>
+                    <div class="chart-placeholder"><span class="material-symbols-rounded">calendar_view_month</span><p>Area Chart Widget</p></div>
+                </div>
+                <div class="glass-card">
+                    <h4>Learning Progress Assessment</h4>
+                    <div class="chart-placeholder"><span class="material-symbols-rounded">bar_chart</span><p>Bar Progress Chart</p></div>
+                </div>
+            </div>
+
+            <!-- Splits: Activities and Tasks -->
+            <div class="grid-split">
+                <div class="glass-card">
+                    <h4>Recent Activities</h4>
+                    <div class="list-container" id="home-activities"></div>
+                </div>
+                <div class="glass-card">
+                    <h4>System Tasks & Alerts</h4>
+                    <div class="list-container">
+                        <div class="task-item"><label><input type="checkbox"> Audit Ahmedabad Center</label><span class="badge badge-risk">Urgent</span></div>
+                        <div class="task-item"><label><input type="checkbox"> Process Volunteer Certificates</label><span class="badge badge-pending">Tomorrow</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Learning Centers View -->
+        <section id="view-centers" class="page-view">
+            <div class="flex-between" style="margin-bottom:20px;">
+                <h2>Learning Centers Management</h2>
+                <button class="btn-primary">+ Add Learning Center</button>
+            </div>
+            
+            <div class="glass-card table-container">
+                <table class="data-table">
+                    <thead><tr><th>Center Name</th><th>Teachers Assigned</th><th>Student Count</th><th>Supervisor</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 3. Student Management View -->
+        <section id="view-students" class="page-view">
+            <div class="flex-between" style="margin-bottom: 20px; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <h2>Student Directory</h2>
+                <div class="flex-start" style="gap: 8px;">
+                    <button class="btn-outline" id="admin-export-excel-btn" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem;"><span class="material-symbols-rounded" style="font-size:18px;">download</span> Export Excel</button>
+                    <button class="btn-outline" id="admin-export-pdf-btn" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem;"><span class="material-symbols-rounded" style="font-size:18px;">picture_as_pdf</span> Export PDF</button>
+                </div>
+            </div>
+            <div class="glass-card table-container" style="margin-top:10px;">
+                <table class="data-table">
+                    <thead><tr><th>Name</th><th>Student ID</th><th>Learning Center</th><th>Guardian Contacts</th><th>Attendance</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 4. Teacher Management View -->
+        <section id="view-teachers" class="page-view">
+            <h2>Teacher Registry</h2>
+            <div class="glass-card table-container" style="margin-top:20px;">
+                <table class="data-table">
+                    <thead><tr><th>Name</th><th>Assigned Center</th><th>Experience</th><th>Subjects taught</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 5. Supervisor Management View -->
+        <section id="view-supervisors" class="page-view">
+            <h2>Field Supervisors</h2>
+            <div class="glass-card table-container" style="margin-top:20px;">
+                <table class="data-table">
+                    <thead><tr><th>Name</th><th>District</th><th>Mobile</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 6. Volunteer Management View -->
+        <section id="view-volunteers" class="page-view">
+            <h2>Volunteers Directory</h2>
+            <div class="glass-card table-container" style="margin-top:20px;">
+                <table class="data-table">
+                    <thead><tr><th>Name</th><th>Mobile</th><th>Email</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 7. Parent Directory View -->
+        <section id="view-parents" class="page-view">
+            <h2>Parent Contacts</h2>
+            <div class="glass-card table-container" style="margin-top:20px;">
+                <table class="data-table">
+                    <thead><tr><th>Parent/Guardian</th><th>Contact</th><th>Associated Center</th><th>Actions</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 8. Attendance Reports View -->
+        <section id="view-attendance" class="page-view">
+            <h2>Attendance Quality Reports</h2>
+            <div class="glass-card table-container" style="margin-top:20px;">
+                <table class="data-table">
+                    <thead><tr><th>Student Name</th><th>Center</th><th>Attendance rate</th><th>Audit status</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 9. Learning Progress View -->
+        <section id="view-progress" class="page-view">
+            <h2>Learning Progress Evaluations</h2>
+            <div class="glass-card table-container" style="margin-top:20px;">
+                <table class="data-table">
+                    <thead><tr><th>Student Name</th><th>Center</th><th>Average Score</th><th>Evaluation Status</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 10. Dropout Risk View -->
+        <section id="view-dropout" class="page-view">
+            <h2>Critical Dropout Risk Dashboard</h2>
+            <div class="glass-card table-container" style="margin-top:20px;">
+                <table class="data-table">
+                    <thead><tr><th>Student Name</th><th>Center</th><th>Attendance rate</th><th>Risk Indicator</th><th>Intervention Actions</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 11. Resource Management View -->
+        <section id="view-resources" class="page-view">
+            <h2>NGO Resource Inventory</h2>
+            <div class="grid-stats" id="inventory-grid" style="margin-top:20px;"></div>
+        </section>
+
+        <!-- 12. Notifications View -->
+        <section id="view-notifications" class="page-view">
+            <h2>Create & Broadcast Announcements</h2>
+            <div class="glass-card" style="max-width: 600px; margin-top:20px;">
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label style="display:block; margin-bottom:8px; font-weight:600; color:var(--text-dark);">Target Group</label>
+                    <select id="announce-group" style="width:100%; padding:10px; border:1px solid var(--border); border-radius: var(--radius-sm); outline:none; background:var(--background); color:var(--text-dark);">
+                        <option>All Teachers</option>
+                        <option>All Supervisors</option>
+                        <option>All Parents</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label style="display:block; margin-bottom:8px; font-weight:600; color:var(--text-dark);">Message Text</label>
+                    <textarea id="announce-msg" placeholder="Type notification..." style="width:100%; height:120px; padding:10px; border:1px solid var(--border); border-radius: var(--radius-sm); outline:none; background:var(--background); color:var(--text-dark); font-family:inherit;"></textarea>
+                </div>
+                <button class="btn-primary" id="send-announce">Broadcast Announcement</button>
+            </div>
+        </section>
+
+        <!-- 13. Reports View -->
+        <section id="view-reports" class="page-view">
+            <h2>Financial & Operations Report Generation</h2>
+            <div class="grid-stats" style="margin-top:20px;">
+                <div class="glass-card kpi-card"><h4>Attendance Audits</h4><button class="btn-primary">Generate PDF</button></div>
+                <div class="glass-card kpi-card"><h4>Learning Evaluations</h4><button class="btn-primary">Generate PDF</button></div>
+                <div class="glass-card kpi-card"><h4>Financial Expenses</h4><button class="btn-primary">Generate PDF</button></div>
+            </div>
+        </section>
+
+        <!-- 14. GIS Resource Map View -->
+        <section id="view-gismap" class="page-view">
+            <h2 style="margin-bottom:8px;">GIS Learning Centers Resource Map</h2>
+            <p style="margin: 0 0 16px 0; color: var(--text-body); font-size: 0.9rem;">🗺️ Manage Main Offices, Learning Centers, Classrooms, Volunteers, and Risk Areas in real time.</p>
+
+            <!-- Analytics Cards -->
+            <div class="grid-stats" id="gismap-analytics" style="margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
+                <div class="glass-card kpi-card" style="display: flex; flex-direction: column; gap: 8px; padding: 16px;">
+                    <div class="kpi-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span class="material-symbols-rounded" style="color:var(--primary); background:rgba(37,99,235,0.08); padding: 8px; border-radius: 8px;">corporate_fare</span>
+                    </div>
+                    <div class="kpi-value"><h3 id="gis-stat-main-offices" style="margin: 4px 0 0 0; font-size: 1.5rem;">0</h3></div>
+                    <p style="margin:0; font-size:0.8rem; color:var(--text-body);">Total Main Offices</p>
+                </div>
+                <div class="glass-card kpi-card" style="display: flex; flex-direction: column; gap: 8px; padding: 16px;">
+                    <div class="kpi-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span class="material-symbols-rounded" style="color:#22C55E; background:rgba(34,197,94,0.08); padding: 8px; border-radius: 8px;">school</span>
+                    </div>
+                    <div class="kpi-value"><h3 id="gis-stat-learning-centers" style="margin: 4px 0 0 0; font-size: 1.5rem;">0</h3></div>
+                    <p style="margin:0; font-size:0.8rem; color:var(--text-body);">Total Learning Centers</p>
+                </div>
+                <div class="glass-card kpi-card" style="display: flex; flex-direction: column; gap: 8px; padding: 16px;">
+                    <div class="kpi-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span class="material-symbols-rounded" style="color:#F59E0B; background:rgba(245,158,11,0.08); padding: 8px; border-radius: 8px;">room</span>
+                    </div>
+                    <div class="kpi-value"><h3 id="gis-stat-classrooms" style="margin: 4px 0 0 0; font-size: 1.5rem;">0</h3></div>
+                    <p style="margin:0; font-size:0.8rem; color:var(--text-body);">Total Classrooms</p>
+                </div>
+                <div class="glass-card kpi-card" style="display: flex; flex-direction: column; gap: 8px; padding: 16px;">
+                    <div class="kpi-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span class="material-symbols-rounded" style="color:#8B5CF6; background:rgba(139,92,246,0.08); padding: 8px; border-radius: 8px;">group</span>
+                    </div>
+                    <div class="kpi-value"><h3 id="gis-stat-teachers" style="margin: 4px 0 0 0; font-size: 1.5rem;">0</h3></div>
+                    <p style="margin:0; font-size:0.8rem; color:var(--text-body);">Total Teachers</p>
+                </div>
+                <div class="glass-card kpi-card" style="display: flex; flex-direction: column; gap: 8px; padding: 16px;">
+                    <div class="kpi-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span class="material-symbols-rounded" style="color:#10B981; background:rgba(16,185,129,0.08); padding: 8px; border-radius: 8px;">child_care</span>
+                    </div>
+                    <div class="kpi-value"><h3 id="gis-stat-students" style="margin: 4px 0 0 0; font-size: 1.5rem;">0</h3></div>
+                    <p style="margin:0; font-size:0.8rem; color:var(--text-body);">Total Students</p>
+                </div>
+                <div class="glass-card kpi-card" style="display: flex; flex-direction: column; gap: 8px; padding: 16px;">
+                    <div class="kpi-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span class="material-symbols-rounded" style="color:#EF4444; background:rgba(239,68,68,0.08); padding: 8px; border-radius: 8px;">warning</span>
+                    </div>
+                    <div class="kpi-value"><h3 id="gis-stat-risk-areas" style="margin: 4px 0 0 0; font-size: 1.5rem;">0</h3></div>
+                    <p style="margin:0; font-size:0.8rem; color:var(--text-body);">High Risk Areas</p>
+                </div>
+            </div>
+
+            <!-- Search & GPS Control -->
+            <div class="flex-between" style="margin-bottom: 16px; gap: 16px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 280px; position: relative;">
+                    <span class="material-symbols-rounded" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-body);">search</span>
+                    <input type="text" id="gismap-search-input" placeholder="Search City, Area, Village, School, NGO, Street, Building..." style="width: 100%; padding: 10px 16px 10px 40px; border: 1px solid var(--border); border-radius: var(--radius-md); outline: none; background: var(--surface); color: var(--text-dark); font-family: inherit;">
+                </div>
+                <button class="btn-outline" id="btn-my-location" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: var(--radius-md); font-weight: 500;">
+                    <span class="material-symbols-rounded" style="font-size: 20px;">my_location</span> My Location
+                </button>
+            </div>
+
+            <!-- Interactive Map Area -->
+            <div class="map-wrapper" style="position: relative; flex: 1; min-height: 550px; display: flex;">
+                <div id="google-map-container" style="width: 100%; height: 100%; min-height: 550px; border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden;"></div>
+                
+                <!-- Offline Warning Indicator -->
+                <div id="gis-offline-alert" style="display: none; position: absolute; top: 16px; left: 50%; transform: translateX(-50%); background: #EF4444; color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: var(--shadow-md); z-index: 100; align-items: center; gap: 6px;">
+                    <span class="material-symbols-rounded" style="font-size:18px;">cloud_off</span> You are offline. Changes will sync when online.
+                </div>
+
+                <!-- Floating Sidebar Layers Panel -->
+                <div class="map-filter-panel" style="position: absolute; top: 16px; right: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; box-shadow: var(--shadow-md); z-index: 10; width: 200px; display: flex; flex-direction: column; gap: 12px;">
+                    <h4 style="margin: 0 0 8px 0; border-bottom: 1px solid var(--border); padding-bottom: 4px; font-size: 0.9rem; font-weight: 600;">Map Layers</h4>
+                    <label class="map-filter-item" style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-dark); cursor: pointer;">
+                        <input type="checkbox" id="filter-main-office" checked style="cursor: pointer;">
+                        <span>🏢 Main Office</span>
+                    </label>
+                    <label class="map-filter-item" style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-dark); cursor: pointer;">
+                        <input type="checkbox" id="filter-learning-center" checked style="cursor: pointer;">
+                        <span>🎓 Learning Center</span>
+                    </label>
+                    <label class="map-filter-item" style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-dark); cursor: pointer;">
+                        <input type="checkbox" id="filter-classroom" checked style="cursor: pointer;">
+                        <span>🏫 Classroom</span>
+                    </label>
+                    <label class="map-filter-item" style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-dark); cursor: pointer;">
+                        <input type="checkbox" id="filter-volunteer" checked style="cursor: pointer;">
+                        <span>🙋 Volunteer</span>
+                    </label>
+                    <label class="map-filter-item" style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-dark); cursor: pointer;">
+                        <input type="checkbox" id="filter-risk-area" checked style="cursor: pointer;">
+                        <span>⚠️ Risk Areas</span>
+                    </label>
+                </div>
+            </div>
+        </section>
+
+        <!-- 15. Chatbot Logs View -->
+        <section id="view-chatbot" class="page-view">
+            <h2>AI Assistant Inquiry Logs</h2>
+            <div class="glass-card table-container" style="margin-top:20px;">
+                <table class="data-table">
+                    <thead><tr><th>Query Origin</th><th>Message Prompt</th><th>AI Response</th><th>Inquiry status</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 16. User Management View -->
+        <section id="view-users" class="page-view">
+            <h2>User Account Management</h2>
+            <div class="glass-card table-container" style="margin-top:20px;">
+                <table class="data-table">
+                    <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>System Status</th><th>Administrative action</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 17. Settings View -->
+        <section id="view-settings" class="page-view">
+            <h2>General Settings</h2>
+            <div class="glass-card" style="max-width: 600px; margin-top:20px;">
+                <div class="flex-between" style="padding: 16px 0; border-bottom:1px solid var(--border);">
+                    <div>
+                        <h4 style="margin:0;">Theme Selector (Dark Mode)</h4>
+                        <p style="margin:0; font-size:0.8rem; color:var(--text-body);">Switch to high-contrast dark theme</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="dark-theme-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </section>
+
+        <!-- 18. Profile View -->
+        <section id="view-profile" class="page-view">
+            <h2>NGO Admin Profile</h2>
+            <div class="glass-card profile-card" style="margin-top:20px;">
+                <div class="profile-large-avatar">AD</div>
+                <h2>Administrator</h2>
+                <span class="badge badge-active" style="margin-bottom:20px;">Main Office Admin</span>
+                <div style="text-align:left; border-top:1px solid var(--border); padding-top:20px;">
+                    <div class="info-row" style="margin-bottom:10px;"><span class="label">Email:</span> <span class="value" style="font-weight:600; color:var(--text-dark);"></span></div>
+                    <div class="info-row" style="margin-bottom:10px;"><span class="label">Mobile:</span> <span class="value" style="font-weight:600; color:var(--text-dark);"></span></div>
+                    <div class="info-row"><span class="label">Location:</span> <span class="value" style="font-weight:600; color:var(--text-dark);"></span></div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</div>
+
+<!-- Floating AI Assistant -->
+<button class="ai-assistant-btn" title="AI Assistant Stats">
+    <span class="material-symbols-rounded">online_prediction</span>
+</button>
+
+<!-- Notification Panel Drawer -->
+<div id="notification-panel" class="notification-panel">
+    <div class="panel-header">
+        <h3>Notifications</h3>
+        <button class="icon-btn" id="close-panel"><span class="material-symbols-rounded">close</span></button>
+    </div>
+    <div class="panel-content">
+        <!-- Render notifications dynamically -->
+    </div>
+</div>
+
+<!-- GIS Location Add/Edit Modal Overlay -->
+<div class="modal-overlay" id="gis-location-modal">
+    <div class="modal-content" style="max-width: 600px;">
+        <h3 id="gis-modal-title" style="margin-top: 0;">Add New Location</h3>
+        <input type="hidden" id="gis-location-id">
+        <form id="gis-location-form" style="display: flex; flex-direction: column; gap: 16px;">
+            <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                    <label for="gis-type">Location Type</label>
+                    <select id="gis-type" class="form-control" required style="width: 100%;">
+                        <option value="Main Office">Main Office</option>
+                        <option value="Learning Center">Learning Center</option>
+                        <option value="Classroom">Classroom</option>
+                        <option value="Volunteer">Volunteer</option>
+                        <option value="Risk Area">Risk Area</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="gis-name">Location Name</label>
+                    <input type="text" id="gis-name" class="form-control" required placeholder="e.g. Hope Hub Class 1" style="width: 100%;">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="gis-address">Address</label>
+                <input type="text" id="gis-address" class="form-control" required placeholder="Fetching address..." style="width: 100%;">
+            </div>
+
+            <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                    <label for="gis-lat">Latitude</label>
+                    <input type="number" id="gis-lat" step="any" class="form-control" readonly style="width: 100%; background: #f8fafc; cursor: not-allowed;">
+                </div>
+                <div class="form-group">
+                    <label for="gis-lng">Longitude</label>
+                    <input type="number" id="gis-lng" step="any" class="form-control" readonly style="width: 100%; background: #f8fafc; cursor: not-allowed;">
+                </div>
+            </div>
+
+            <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                    <label for="gis-teacher">Teacher / Lead</label>
+                    <input type="text" id="gis-teacher" class="form-control" placeholder="e.g. Meena Patel" style="width: 100%;">
+                </div>
+                <div class="form-group">
+                    <label for="gis-contact">Contact Number</label>
+                    <input type="text" id="gis-contact" class="form-control" placeholder="e.g. 9876543210" style="width: 100%;">
+                </div>
+            </div>
+
+            <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                    <label for="gis-capacity">Capacity (Students)</label>
+                    <input type="number" id="gis-capacity" class="form-control" placeholder="e.g. 35" style="width: 100%;">
+                </div>
+                <div class="form-group">
+                    <label for="gis-status">Status</label>
+                    <select id="gis-status" class="form-control" style="width: 100%;">
+                        <option value="Healthy">Healthy</option>
+                        <option value="Warning">Warning</option>
+                        <option value="Critical">Critical</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="gis-photo-file">Photo Upload</label>
+                <input type="file" id="gis-photo-file" accept="image/*" class="form-control" style="width: 100%; margin-bottom: 8px;">
+                <input type="hidden" id="gis-photo-url">
+                <div id="gis-photo-preview-container" style="display:none; text-align:center;">
+                    <img id="gis-photo-preview" src="" style="max-height: 120px; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                </div>
+            </div>
+
+            <div class="form-actions" style="justify-content: flex-end; gap: 12px; margin-top: 8px; display: flex;">
+                <button type="button" id="btn-gis-modal-cancel" class="btn-outline" style="padding: 10px 20px;">Cancel</button>
+                <button type="submit" id="btn-gis-modal-save" class="btn-primary" style="padding: 10px 20px;">Save Location</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="admin-dashboard.js"></script>
+</body>
+</html>

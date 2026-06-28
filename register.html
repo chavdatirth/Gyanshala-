@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - Gyan Shala</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="auth.css">
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+       (function(){
+          emailjs.init("Fg-X3faj9SpZFerG6"); // Replace with your EmailJS Public Key
+       })();
+    </script>
+</head>
+<body>
+    <div class="auth-wrapper">
+        <!-- Left Side: Hero Illustration -->
+        <div class="auth-hero" style="background-image: url('images/new_hero_classroom_1782540357517.jpg');">
+            <div class="auth-hero-overlay"></div>
+            <div class="auth-hero-content">
+                <h1>Join Gyan Shala NGO</h1>
+                <p>Empowering children through education. Sign up to start making a difference today.</p>
+            </div>
+        </div>
+        
+        <!-- Right Side: Multi-Step Registration Form -->
+        <div class="auth-main">
+            <div class="auth-card wide">
+                <div class="auth-header">
+                    <a href="index.html" class="auth-logo">
+                        <span class="logo-icon">📚</span>
+                        Gyan Shala
+                    </a>
+                    <h2 id="register-title">Create Account</h2>
+                    <p id="register-subtitle">Step 1 of 3: Personal Information</p>
+                </div>
+                
+                <form id="register-form" class="auth-form">
+                    
+                    <!-- STEP 1: Personal Info -->
+                    <div id="register-step-1" class="auth-step-panel active">
+                        <div class="form-group">
+                            <label for="fullName" class="form-label">Full Name *</label>
+                            <input type="text" id="fullName" class="form-control" placeholder="Enter your full name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email" class="form-label">Email Address *</label>
+                            <input type="email" id="email" class="form-control" placeholder="name@example.com" required>
+                        </div>
+                        
+                        <button type="button" id="btn-step-1-continue" class="btn-auth" style="margin-top: 16px;">
+                            <span class="btn-text">Continue</span>
+                        </button>
+                    </div>
+
+                    <!-- STEP 2: Email Verification (OTP) -->
+                    <div id="register-step-2" class="auth-step-panel">
+                        <div class="message-box success" style="margin-bottom: 20px; display: block; background-color: rgba(37, 99, 235, 0.05); color: var(--primary-blue); border: 1px solid rgba(37, 99, 235, 0.1);">
+                            <p style="font-weight: 600;">Email Verification Required</p>
+                            <p style="font-size: 0.85rem; margin-top: 4px;">We have sent a verification code to your email. Please enter it below to verify your email before continuing.</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="otp-input" class="form-label">Verification Code (OTP) *</label>
+                            <input type="text" id="otp-input" class="form-control" placeholder="Enter 6-digit code" pattern="[0-9]{6}" maxlength="6" required>
+                        </div>
+                        
+                        <div class="flex-between" style="margin-top: 24px; gap: 16px;">
+                            <button type="button" id="btn-step-2-back" class="btn-outline" style="flex: 1; padding: 16px; border-radius: 12px; font-weight: 600;">Back</button>
+                            <button type="button" id="btn-step-2-verify" class="btn-auth" style="flex: 1.5; margin-top: 0;">
+                                <span class="btn-text">Verify Email</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3: Passwords & Role Select -->
+                    <div id="register-step-3" class="auth-step-panel">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="password" class="form-label">Password *</label>
+                                <div class="password-wrapper">
+                                    <input type="password" id="password" class="form-control" placeholder="Minimum 8 characters" minlength="8" required>
+                                    <button type="button" class="password-toggle">Show</button>
+                                </div>
+                                <div id="password-strength" class="password-strength">
+                                    <div class="strength-bar bar-1"></div>
+                                    <div class="strength-bar bar-2"></div>
+                                    <div class="strength-bar bar-3"></div>
+                                </div>
+                                <span id="strength-text" class="strength-text"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirm_password" class="form-label">Confirm Password *</label>
+                                <div class="password-wrapper">
+                                    <input type="password" id="confirm_password" class="form-control" placeholder="Re-enter password" minlength="8" required>
+                                    <button type="button" class="password-toggle">Show</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 16px;">
+                            <label class="form-label">Select Your Role *</label>
+                            <select id="role" class="form-control" required>
+                                <option value="">Choose your role...</option>
+                                <option value="teacher">👩‍🏫 Teacher</option>
+                                <option value="supervisor">👨‍💼 Supervisor</option>
+                                <option value="volunteer">🤝 Volunteer</option>
+                                <option value="main_office">🏢 Admin (Main Office)</option>
+                            </select>
+                        </div>
+
+                        <div class="checkbox-group" style="margin-top: 20px;">
+                            <input type="checkbox" id="terms" required>
+                            <label for="terms">I agree to the <a href="#" class="auth-link">Privacy Policy</a> and <a href="#" class="auth-link">Terms & Conditions</a>.</label>
+                        </div>
+
+                        <button type="submit" class="btn-auth" style="margin-top: 24px;">
+                            <span class="spinner"></span>
+                            <span class="btn-text">Create Account</span>
+                        </button>
+                    </div>
+
+                    <div class="auth-divider"></div>
+                    
+                    <p class="text-center" style="font-size: 0.875rem;">
+                        Already have an account? <a href="login.html" class="auth-link">Sign In</a>
+                    </p>
+                </form>
+            </div>
+            
+            <div class="auth-footer-links">
+                <a href="#">&copy; 2026 Gyan Shala</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms & Conditions</a>
+            </div>
+        </div>
+    </div>
+    <script src="auth.js"></script>
+</body>
+</html>

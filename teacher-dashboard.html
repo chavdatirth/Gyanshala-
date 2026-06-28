@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gyanshala Teacher Dashboard</title>
+    <link rel="stylesheet" href="teacher-dashboard.css">
+    <link rel="stylesheet" href="dashboard-extension.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jsPDF and jsPDF-AutoTable CDNs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+<div class="app-container">
+    
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header" id="menu-toggle" style="cursor: pointer;">
+            <span class="material-symbols-rounded text-primary" style="font-size: 32px;">school</span>
+            <h2>Gyanshala</h2>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-target="home">
+                <span class="material-symbols-rounded">dashboard</span> <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" data-target="students">
+                <span class="material-symbols-rounded">groups</span> <span>My Students</span>
+            </a>
+            <a href="#" class="nav-item" data-target="addstudent">
+                <span class="material-symbols-rounded">person_add</span> <span>Add Student</span>
+            </a>
+            <a href="#" class="nav-item" data-target="studentprofile">
+                <span class="material-symbols-rounded">account_circle</span> <span>Student Profile</span>
+            </a>
+            <a href="#" class="nav-item" data-target="attendance">
+                <span class="material-symbols-rounded">event_available</span> <span>Daily Attendance</span>
+            </a>
+            <a href="#" class="nav-item" data-target="assessments">
+                <span class="material-symbols-rounded">quiz</span> <span>Assessments</span>
+            </a>
+            <a href="#" class="nav-item" data-target="alerts">
+                <span class="material-symbols-rounded">warning</span> <span>Dropout Alerts</span>
+            </a>
+            <a href="#" class="nav-item" data-target="messages">
+                <span class="material-symbols-rounded">chat</span> <span>Messages</span>
+            </a>
+            <a href="#" class="nav-item" data-target="profile">
+                <span class="material-symbols-rounded">person</span> <span>Profile</span>
+            </a>
+            <a href="#" class="nav-item" data-target="settings">
+                <span class="material-symbols-rounded">settings</span> <span>Settings</span>
+            </a>
+            <a href="#" class="nav-item" data-target="help">
+                <span class="material-symbols-rounded">help</span> <span>Help</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="logout-btn">
+                <span class="material-symbols-rounded">logout</span> <span>Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        
+        <!-- Top App Bar -->
+        <header class="top-app-bar">
+            <div class="top-bar-left">
+                <div class="logo-section">
+                    <h1>Teacher Panel</h1>
+                </div>
+                <div class="search-bar">
+                    <span class="material-symbols-rounded">search</span>
+                    <input type="text" placeholder="Search student names..." />
+                </div>
+            </div>
+            
+            <div class="top-bar-right">
+                <div class="current-time-box">
+                    <span id="current-date" style="font-weight: 600;"></span>
+                    <span id="current-time"></span>
+                </div>
+                
+                <button class="icon-btn" id="notification-btn">
+                    <span class="material-symbols-rounded">notifications</span>
+                    <span class="badge-dot" style="display: none;"></span>
+                </button>
+                
+                <div class="avatar">T</div>
+            </div>
+        </header>
+
+        <!-- Dashboard Layout Split -->
+        <div class="dashboard-layout">
+            
+            <!-- Center Main Dynamic View -->
+            <div class="dashboard-main-view">
+                
+                <!-- 1. Home View -->
+                <section id="view-home" class="page-view active">
+                    <div class="flex-between" style="margin-bottom: 20px;">
+                        <h2>Overview Home</h2>
+                    </div>
+
+                    <div class="grid-stats">
+                        <div class="glass-card kpi-card">
+                            <div class="kpi-header"><span class="kpi-icon"><span class="material-symbols-rounded">groups</span></span></div>
+                            <div class="kpi-value"><h3 id="kpi-total-students">0</h3><p>Total Students</p></div>
+                        </div>
+                        <div class="glass-card kpi-card">
+                            <div class="kpi-header"><span class="kpi-icon"><span class="material-symbols-rounded">event_available</span></span></div>
+                            <div class="kpi-value"><h3 id="kpi-today-attendance">0%</h3><p>Today's Attendance</p></div>
+                        </div>
+                        <div class="glass-card kpi-card">
+                            <div class="kpi-header"><span class="kpi-icon"><span class="material-symbols-rounded">assignment_turned_in</span></span></div>
+                            <div class="kpi-value"><h3 id="kpi-assessments-completed">0</h3><p>Assessments Graded</p></div>
+                        </div>
+                        <div class="glass-card kpi-card">
+                            <div class="kpi-header"><span class="kpi-icon"><span class="material-symbols-rounded">warning</span></span></div>
+                            <div class="kpi-value"><h3 id="kpi-dropout-risk" class="text-danger">0</h3><p>Dropout Alerts</p></div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Grid -->
+                    <div class="grid-charts">
+                        <div class="glass-card">
+                            <h4>Attendance Quality Trend</h4>
+                            <div class="chart-box"><canvas id="attendanceTrendChart"></canvas></div>
+                        </div>
+                        <div class="glass-card">
+                            <h4>Student Performance Statistics</h4>
+                            <div class="chart-box"><canvas id="studentPerformanceChart"></canvas></div>
+                        </div>
+                    </div>
+
+                    <!-- Splits: Recent activities & Checklist Tasks -->
+                    <div class="grid-split">
+                        <div class="glass-card">
+                            <h4>Recent Activities Log</h4>
+                            <div class="activity-list" id="dashboard-activities"></div>
+                        </div>
+                        <div class="glass-card">
+                            <h4>Pending Action Items</h4>
+                            <div class="task-list">
+                                <div class="task-item"><span>Grade Class Test 2</span><span class="badge badge-risk">Urgent</span></div>
+                                <div class="task-item"><span>Upload Hope Center Assessment report</span><span class="badge badge-medium">Tomorrow</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. My Students View -->
+                <section id="view-students" class="page-view">
+                    <div class="flex-between" style="margin-bottom: 20px; align-items: center; flex-wrap: wrap; gap: 12px;">
+                        <h2>Student Registry</h2>
+                        <div class="flex-start" style="gap: 8px;">
+                            <button class="btn-outline" id="export-excel-btn" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem;"><span class="material-symbols-rounded" style="font-size:18px;">download</span> Export Excel</button>
+                            <button class="btn-outline" id="export-pdf-btn" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem;"><span class="material-symbols-rounded" style="font-size:18px;">picture_as_pdf</span> Export PDF</button>
+                        </div>
+                    </div>
+                    <div class="glass-card table-container">
+                        <table class="data-table">
+                            <thead><tr><th>Student Name</th><th>Roll No</th><th>Center</th><th>Attendance rate</th><th>Guardian</th><th>Status</th><th>Actions</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- 3. Add Student View -->
+                <section id="view-addstudent" class="page-view">
+                    <h2>Student Registration Form</h2>
+                    <div class="glass-card" style="margin-top:20px;">
+                        <form id="add-student-form">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Student Full Name *</label>
+                                    <input type="text" id="studentName" class="form-control" placeholder="Ravi Kumar" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Admission / Roll Number *</label>
+                                    <input type="text" id="studentRoll" class="form-control" placeholder="GS-ST-101" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Learning Center *</label>
+                                    <select id="studentCenter" class="form-control" required>
+                                        <option>Sunrise Center</option>
+                                        <option>Hope Hub</option>
+                                        <option>Bright Future</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Guardian Name *</label>
+                                    <input type="text" id="guardianName" class="form-control" placeholder="Suresh Kumar" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Guardian Mobile Number *</label>
+                                    <input type="tel" id="guardianPhone" class="form-control" placeholder="9876543210" required>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn-primary">Save Student</button>
+                                <button type="reset" class="btn-outline">Reset Form</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- 4. Student Profile View -->
+                <section id="view-studentprofile" class="page-view">
+                    <h2>Student Profile Details</h2>
+                    <div class="glass-card" style="margin-top:20px; display:flex; gap:32px; flex-wrap:wrap;">
+                        <div style="flex:1; min-width:260px;">
+                            <h3 id="profile-name" style="margin-bottom:8px;">Ravi Kumar</h3>
+                            <div class="info-row" style="margin-bottom:12px;"><span class="label">Roll Number:</span> <span id="profile-roll" class="value" style="font-weight:600; color:var(--text-dark);"></span></div>
+                            <div class="info-row" style="margin-bottom:12px;"><span class="label">Learning Center:</span> <span id="profile-center" class="value" style="font-weight:600; color:var(--text-dark);"></span></div>
+                            <div class="info-row" style="margin-bottom:12px;"><span class="label">Parent/Guardian:</span> <span id="profile-guardian" class="value" style="font-weight:600; color:var(--text-dark);"></span></div>
+                            <div class="info-row" style="margin-bottom:12px;"><span class="label">Phone:</span> <span id="profile-phone" class="value" style="font-weight:600; color:var(--text-dark);"></span></div>
+                            <div class="info-row" style="margin-bottom:12px;"><span class="label">Attendance:</span> <span id="profile-attendance" class="value" style="font-weight:600; color:var(--text-dark);"></span></div>
+                        </div>
+                        <div style="flex:1.5; min-width:320px;">
+                            <h4>Assessments Progress Trend</h4>
+                            <div class="chart-box"><canvas id="studentProfileChart"></canvas></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. Daily Attendance View -->
+                <section id="view-attendance" class="page-view">
+                    <div class="flex-between">
+                        <h2>Daily Attendance Tracker</h2>
+                        <button class="btn-primary" id="save-attendance-btn">Save Attendance Report</button>
+                    </div>
+                    
+                    <div class="grid-charts" style="margin-top:20px;">
+                        <div class="glass-card" style="height:250px;">
+                            <h4>Monthly Attendance Share</h4>
+                            <div class="chart-box" style="height:150px;"><canvas id="monthlyAttendanceChart"></canvas></div>
+                        </div>
+                        <div class="glass-card" style="height:250px;">
+                            <h4>Quick Filter Dates</h4>
+                            <div class="calendar-grid">
+                                <div class="calendar-day-name">M</div><div class="calendar-day-name">T</div><div class="calendar-day-name">W</div><div class="calendar-day-name">T</div><div class="calendar-day-name">F</div><div class="calendar-day-name">S</div><div class="calendar-day-name">S</div>
+                                <div class="calendar-day">22</div><div class="calendar-day">23</div><div class="calendar-day">24</div><div class="calendar-day">25</div><div class="calendar-day">26</div><div class="calendar-day">27</div><div class="calendar-day active">28</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="attendance-grid"></div>
+                </section>
+
+                <!-- 6. Student Assessments View -->
+                <section id="view-assessments" class="page-view">
+                    <h2>Student Assessments & Grading</h2>
+                    
+                    <div class="grid-split" style="margin-top:20px;">
+                        <div class="glass-card">
+                            <h4>Record Assessment Result</h4>
+                            <div class="form-grid" style="grid-template-columns:1fr; gap:12px; margin-top:12px;">
+                                <div class="form-group">
+                                    <label>Assessment Subject</label>
+                                    <input type="text" id="ass-subject" class="form-control" placeholder="Mathematics Test 2">
+                                </div>
+                                <div class="form-group">
+                                    <label>Student Full Name</label>
+                                    <input type="text" id="ass-student" class="form-control" placeholder="Ravi Kumar">
+                                </div>
+                                <div class="form-group">
+                                    <label>Marks Scored (%)</label>
+                                    <input type="number" id="ass-marks" class="form-control" placeholder="85">
+                                </div>
+                                <div class="form-group">
+                                    <label>Grade Secured</label>
+                                    <input type="text" id="ass-grade" class="form-control" placeholder="A+">
+                                </div>
+                                <div class="form-group">
+                                    <label>Teacher Remarks</label>
+                                    <input type="text" id="ass-remarks" class="form-control" placeholder="Excellent performance">
+                                </div>
+                            </div>
+                            <button class="btn-primary" id="save-assessment" style="margin-top:16px;">Save Grading</button>
+                        </div>
+                        <div class="glass-card">
+                            <h4>Subject Performance Graph</h4>
+                            <div class="chart-box" style="height:250px;"><canvas id="assessmentCompChart"></canvas></div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card table-container" style="margin-top:24px;">
+                        <table class="data-table">
+                            <thead><tr><th>Assessment Topic</th><th>Student Name</th><th>Marks Score</th><th>Grade</th><th>Remarks</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- 7. Dropout Alerts View -->
+                <section id="view-alerts" class="page-view">
+                    <h2>Critical Attendance Risk Dashboard</h2>
+                    <div class="glass-card table-container" style="margin-top:20px;">
+                        <table class="data-table">
+                            <thead><tr><th>Student Name</th><th>Learning Center</th><th>Attendance Rate</th><th>Risk Level</th><th>Action trigger</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- 8. Messages View -->
+                <section id="view-messages" class="page-view">
+                    <h2>Supervisor Communications Channel</h2>
+                    <div class="chat-layout">
+                        <div class="chat-sidebar">
+                            <div class="chat-search"><input type="text" placeholder="Search chats..." style="width:100%; padding:8px; border:1px solid var(--border); border-radius:8px;"></div>
+                            <div class="chat-list"></div>
+                        </div>
+                        <div class="chat-window">
+                            <div class="chat-header">
+                                <div class="avatar">S</div>
+                                <div><h3 style="margin:0; font-size:1rem;">Supervisor Name</h3><small class="text-body">Field Supervisor</small></div>
+                            </div>
+                            <div class="chat-messages"></div>
+                            <div class="chat-input">
+                                <input type="text" placeholder="Type messages...">
+                                <button class="icon-btn" style="background:var(--primary); color:white;"><span class="material-symbols-rounded">send</span></button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 9. Profile View -->
+                <section id="view-profile" class="page-view">
+                    <h2>Teacher Registry Details</h2>
+                    <div class="glass-card" style="max-width:500px; margin-top:20px;">
+                        <div class="avatar" style="width:72px; height:72px; font-size:1.75rem; margin:0 auto 16px auto;">T</div>
+                        <h3 style="text-align:center;" id="welcome-teacher-name"></h3>
+                        <div style="border-top:1px solid var(--border); margin-top:20px; padding-top:20px;">
+                            <div class="info-row" style="margin-bottom:12px;"><span class="label">Teacher ID:</span> <span class="value" style="font-weight:600; color:var(--text-dark);"></span></div>
+                            <div class="info-row" style="margin-bottom:12px;"><span class="label">Email:</span> <span class="value" style="font-weight:600; color:var(--text-dark);"></span></div>
+                            <div class="info-row" style="margin-bottom:12px;"><span class="label">Mobile:</span> <span class="value" style="font-weight:600; color:var(--text-dark);"></span></div>
+                            <div class="info-row"><span class="label">Professional Qualifications:</span> <span class="value" style="font-weight:600; color:var(--text-dark);"></span></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 10. Settings View -->
+                <section id="view-settings" class="page-view">
+                    <h2>General Preferences</h2>
+                    <div class="glass-card" style="max-width:600px; margin-top:20px;">
+                        <div class="flex-between">
+                            <div>
+                                <h4 style="margin:0;">Theme Selector (Dark Mode)</h4>
+                                <p style="margin:0; font-size:0.8rem; color:var(--text-body);">Enable high contrast dark theme</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="dark-theme-toggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 11. Help View -->
+                <section id="view-help" class="page-view">
+                    <h2>Teacher Help & Documentation</h2>
+                    <div class="glass-card" style="max-width:600px; margin-top:20px;">
+                        <h4>Submit Support Ticket</h4>
+                        <div class="form-group" style="margin-top:12px; margin-bottom:16px;">
+                            <label>Describe issue encountered:</label>
+                            <textarea id="help-msg" placeholder=" roof leakage, material issues..." style="width:100%; height:100px; padding:10px; border:1px solid var(--border); border-radius: var(--radius-sm); outline:none; font-family:inherit; color:var(--text-dark); background:var(--background);"></textarea>
+                        </div>
+                        <button class="btn-primary" id="submit-support">Create Support Ticket</button>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- Right Sidebar Widgets -->
+            <aside class="dashboard-right-sidebar">
+                <div>
+                    <h4>Today's Schedule</h4>
+                    <div class="activity-list" style="margin-top:12px;">
+                        <div class="activity-item"><div><strong>10:00 AM - Std 1 Math</strong><p style="margin:0; font-size:0.75rem; color:var(--text-body);">Hope Hub Center</p></div></div>
+                        <div class="activity-item"><div><strong>02:00 PM - Teacher Training</strong><p style="margin:0; font-size:0.75rem; color:var(--text-body);">Zoom Call</p></div></div>
+                    </div>
+                </div>
+                <div>
+                    <h4>Pending Actions</h4>
+                    <div class="activity-list" style="margin-top:12px;">
+                        <div style="padding:10px; background:rgba(220, 38, 38, 0.05); border-left:3px solid var(--danger); border-radius:4px;">
+                            <h5 style="margin:0; font-size:0.85rem; color:var(--text-dark);">Critical attendance alert</h5>
+                            <p style="margin:4px 0 0 0; font-size:0.75rem; color:var(--text-body);">Absent rates > 3 days.</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+        </div>
+
+</div>
+
+<!-- Notification Panel Drawer -->
+<div id="notification-panel" class="notification-panel">
+    <div class="panel-header">
+        <h3>Notifications</h3>
+        <button class="icon-btn" id="close-panel"><span class="material-symbols-rounded">close</span></button>
+    </div>
+    <div class="panel-content">
+        <!-- Render notifications dynamically -->
+    </div>
+</div>
+
+<script src="teacher-dashboard.js"></script>
+</body>
+</html>
