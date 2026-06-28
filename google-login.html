@@ -59,7 +59,7 @@
                 border: 1px solid var(--google-gray-300);
                 border-radius: var(--border-radius);
                 box-shadow: none;
-                min-height: 520px;
+                min-height: 400px;
             }
         }
 
@@ -98,66 +98,6 @@
             font-weight: 500;
         }
 
-        /* Account Chooser List */
-        .account-list {
-            display: flex;
-            flex-direction: column;
-            border-bottom: 1px solid var(--google-gray-300);
-            margin-bottom: 20px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .account-item {
-            display: flex;
-            align-items: center;
-            padding: 10px 0;
-            border-top: 1px solid var(--google-gray-300);
-            cursor: pointer;
-            transition: background-color 0.2s;
-            background: none;
-            border-left: none;
-            border-right: none;
-            text-align: left;
-            width: 100%;
-        }
-
-        .account-item:hover {
-            background-color: var(--google-gray-100);
-        }
-
-        .avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background-color: var(--google-blue);
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: 500;
-            margin-right: 12px;
-            flex-shrink: 0;
-        }
-
-        .account-info {
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-        }
-
-        .account-name {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--google-gray-900);
-        }
-
-        .account-email {
-            font-size: 12px;
-            color: var(--google-gray-600);
-        }
-
         /* Footer Text */
         .disclaimer-text {
             font-size: 12px;
@@ -188,46 +128,19 @@
         }
 
         /* Inputs and Buttons */
-        .form-group {
-            margin-bottom: 24px;
-            position: relative;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 16px;
-            border: 1px solid var(--google-gray-300);
-            border-radius: 4px;
-            font-size: 16px;
-            outline: none;
-            transition: border-color 0.2s;
-            font-family: inherit;
-        }
-
-        .form-control:focus {
-            border-color: var(--google-blue);
-            border-width: 2px;
-            padding: 15px;
-        }
-
-        .form-label {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            background-color: #ffffff;
-            padding: 0 4px;
-            color: var(--google-gray-600);
-            transition: 0.2s ease-all;
-            pointer-events: none;
-            font-size: 16px;
-        }
-
-        .form-control:focus ~ .form-label,
-        .form-control:not(:placeholder-shown) ~ .form-label {
-            top: 0;
-            font-size: 12px;
-            color: var(--google-blue);
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: var(--google-blue);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 500;
+            margin-right: 12px;
+            flex-shrink: 0;
         }
 
         .btn-group {
@@ -333,10 +246,6 @@
             background-color: rgba(26, 115, 232, 0.04);
             color: var(--google-blue);
         }
-
-        .role-card input {
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -355,24 +264,14 @@
             </svg>
         </div>
 
-        <!-- PANEL 1: Choose Account -->
+        <!-- PANEL 1: Google Sign-In Card -->
         <div class="form-panel active" id="panel-choose-account">
             <h2 class="header-title">Sign in</h2>
             <p class="header-subtitle">to continue to <a href="index.html">gyanshala.org</a></p>
 
             <!-- Real Google Sign-In Button Programmatic Container -->
-            <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 24px; width: 100%;">
+            <div style="display: flex; flex-direction: column; align-items: center; margin-top: 32px; margin-bottom: 32px; width: 100%;">
                 <div id="google-btn-container" style="width: 100%; display: flex; justify-content: center;"></div>
-            </div>
-            
-            <div style="display: flex; align-items: center; margin-bottom: 20px; width: 100%;">
-                <div style="flex-grow: 1; height: 1px; background-color: var(--google-gray-300);"></div>
-                <span style="font-size: 11px; color: var(--google-gray-600); padding: 0 10px; font-weight: 500; letter-spacing: 0.5px;">OR SELECT EXISTING SESSION</span>
-                <div style="flex-grow: 1; height: 1px; background-color: var(--google-gray-300);"></div>
-            </div>
-
-            <div class="account-list" id="dynamic-account-list">
-                <!-- Accounts are rendered dynamically here -->
             </div>
 
             <p class="disclaimer-text">
@@ -380,30 +279,7 @@
             </p>
         </div>
 
-        <!-- PANEL 2: Custom Account Creation Form -->
-        <div class="form-panel" id="panel-custom-account">
-            <h2 class="header-title" style="margin-bottom: 6px;">Sign in</h2>
-            <p class="header-subtitle" style="margin-bottom: 24px;">with your Google Account to continue</p>
-
-            <form id="custom-account-form" onsubmit="handleCustomAccountSubmit(event)">
-                <div class="form-group">
-                    <input type="text" id="custom-name" class="form-control" placeholder=" " required>
-                    <label for="custom-name" class="form-label">Full Name</label>
-                </div>
-
-                <div class="form-group">
-                    <input type="email" id="custom-email" class="form-control" placeholder=" " required>
-                    <label for="custom-email" class="form-label">Email address</label>
-                </div>
-
-                <div class="btn-group">
-                    <button type="button" class="btn-text" onclick="goBackToChooser()">Back</button>
-                    <button type="submit" class="btn-primary" id="btn-custom-continue">Continue</button>
-                </div>
-            </form>
-        </div>
-
-        <!-- PANEL 3: Select Role Only -->
+        <!-- PANEL 2: Select Role Only -->
         <div class="form-panel" id="panel-select-role">
             <div style="text-align: center; margin-bottom: 16px;">
                 <div id="role-avatar" class="avatar" style="width: 60px; height: 60px; font-size: 24px; margin: 0 auto 12px auto; display: flex; align-items: center; justify-content: center; border-radius: 50%;">US</div>
@@ -565,77 +441,22 @@
                 google.accounts.id.initialize({
                     client_id: envConfig.VITE_GOOGLE_CLIENT_ID,
                     callback: handleCredentialResponse,
-                    auto_select: false
+                    auto_select: true // Auto sign-in if session active!
                 });
                 google.accounts.id.renderButton(
                     document.getElementById("google-btn-container"),
                     { theme: "outline", size: "large", width: 370 }
                 );
+                
+                // One tap prompting to automatically find browser google identity
+                google.accounts.id.prompt((notification) => {
+                    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                        console.log('One Tap auto-prompt skipped. Interactive button ready.');
+                    }
+                });
             } else {
                 console.warn('Google GSI SDK not loaded.');
             }
-        }
-
-        // Preseed users database with default demo accounts if empty
-        function preseedUsersIfEmpty() {
-            let users = JSON.parse(localStorage.getItem('users') || '[]');
-            if (users.length === 0) {
-                users = [
-                    { id: 'USER-G-1', fullName: 'Zenish Patel', email: 'zenish.patel@gmail.com', role: 'volunteer', password: 'password123', approved: true },
-                    { id: 'USER-G-2', fullName: 'Rajesh Patel', email: 'rajesh.supervisor@gmail.com', role: 'supervisor', password: 'password123', approved: true },
-                    { id: 'USER-G-3', fullName: 'Anjali Desai', email: 'anjali.teacher@gmail.com', role: 'teacher', password: 'password123', approved: true },
-                    { id: 'USER-G-4', fullName: 'Admin Leader', email: 'admin.office@gmail.com', role: 'main_office', password: 'password123', approved: true }
-                ];
-                localStorage.setItem('users', JSON.stringify(users));
-            }
-        }
-
-        // Render existing system accounts dynamically
-        function renderGoogleAccounts() {
-            preseedUsersIfEmpty();
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            const listEl = document.getElementById('dynamic-account-list');
-            if (!listEl) return;
-
-            listEl.innerHTML = '';
-
-            users.forEach(u => {
-                const initials = u.fullName.split(' ').map(n => n.charAt(0)).join('').toUpperCase();
-                let avatarColor = '#1a73e8';
-                if (u.role === 'volunteer') avatarColor = '#8B5CF6';
-                else if (u.role === 'supervisor') avatarColor = '#3B82F6';
-                else if (u.role === 'teacher') avatarColor = '#10B981';
-                else if (u.role === 'main_office') avatarColor = '#EF4444';
-
-                const button = document.createElement('button');
-                button.className = 'account-item';
-                button.onclick = () => selectGoogleAccount(u.fullName, u.email, u.role);
-                button.innerHTML = `
-                    <div class="avatar" style="background-color: ${avatarColor};">${initials}</div>
-                    <div class="account-info">
-                        <span class="account-name">${u.fullName}</span>
-                        <span class="account-email">${u.email}</span>
-                    </div>
-                `;
-                listEl.appendChild(button);
-            });
-
-            // Append Google "Use another account" button
-            const customBtn = document.createElement('button');
-            customBtn.className = 'account-item';
-            customBtn.onclick = () => showCustomAccountForm();
-            customBtn.innerHTML = `
-                <div class="avatar" style="background-color: #f1f3f4; color: var(--google-gray-700);">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="8" r="4"/>
-                        <path d="M18 21a6 6 0 0 0-12 0"/>
-                    </svg>
-                </div>
-                <div class="account-info">
-                    <span class="account-name" style="color: var(--google-blue); font-weight: 500;">Use another account</span>
-                </div>
-            `;
-            listEl.appendChild(customBtn);
         }
 
         // Select Role Only inside dynamic selector
@@ -647,80 +468,11 @@
             cardElement.classList.add('selected');
         }
 
-        // Action when an existing Google profile is clicked
-        function selectGoogleAccount(name, email, role) {
-            selectedUser = { name, email, role, picture: '' };
-            
-            // Set up role avatar initials
-            const initials = name.split(' ').map(n => n.charAt(0)).join('').toUpperCase();
-            const avatarEl = document.getElementById('role-avatar');
-            avatarEl.textContent = initials;
-            
-            // Color avatar matches
-            if (role === 'volunteer') avatarEl.style.backgroundColor = '#8B5CF6';
-            else if (role === 'supervisor') avatarEl.style.backgroundColor = '#3B82F6';
-            else if (role === 'teacher') avatarEl.style.backgroundColor = '#10B981';
-            else if (role === 'main_office') avatarEl.style.backgroundColor = '#EF4444';
-
-            document.getElementById('role-name').textContent = name;
-            document.getElementById('role-email').textContent = email;
-
-            // Pre-select user's default role
-            activeRole = role;
-            document.querySelectorAll('#panel-select-role .role-card').forEach(card => {
-                card.classList.remove('selected');
-                const onclickText = card.getAttribute('onclick');
-                if (onclickText.includes(`'${role}'`)) {
-                    card.classList.add('selected');
-                }
-            });
-
-            // Transition directly to Select Role panel
-            document.getElementById('panel-choose-account').classList.remove('active');
-            document.getElementById('panel-select-role').classList.add('active');
-            document.getElementById('logo-block').classList.add('centered');
-        }
-
-        // Show Custom account create form
-        function showCustomAccountForm() {
-            document.getElementById('panel-choose-account').classList.remove('active');
-            document.getElementById('panel-custom-account').classList.add('active');
-            document.getElementById('logo-block').classList.remove('centered');
-        }
-
-        // Go back to list panel
+        // Go back to chooser panel
         function goBackToChooser() {
-            document.getElementById('panel-custom-account').classList.remove('active');
             document.getElementById('panel-select-role').classList.remove('active');
             document.getElementById('panel-choose-account').classList.add('active');
             document.getElementById('logo-block').classList.remove('centered');
-        }
-
-        // Custom account Form submit handler
-        function handleCustomAccountSubmit(event) {
-            event.preventDefault();
-            const name = document.getElementById('custom-name').value.trim();
-            const email = document.getElementById('custom-email').value.trim();
-
-            selectedUser = {
-                name: name,
-                email: email,
-                role: 'volunteer',
-                picture: ''
-            };
-
-            const initials = name.split(' ').map(n => n.charAt(0)).join('').toUpperCase();
-            const avatarEl = document.getElementById('role-avatar');
-            avatarEl.textContent = initials || 'US';
-            avatarEl.style.backgroundColor = '#1a73e8';
-
-            document.getElementById('role-name').textContent = name;
-            document.getElementById('role-email').textContent = email;
-
-            // Transition to Select Role panel
-            document.getElementById('panel-custom-account').classList.remove('active');
-            document.getElementById('panel-select-role').classList.add('active');
-            document.getElementById('logo-block').classList.add('centered');
         }
 
         // Role select and redirect
@@ -775,10 +527,7 @@
             }
         }
 
-        // Run accounts rendering and initialize real Google Sign-In SDK
-        renderGoogleAccounts();
-        
-        // Wait for script to ensure library is loaded, then initialize
+        // Initialize GSI SDK
         window.addEventListener('load', () => {
             initializeGoogleSignIn();
         });
