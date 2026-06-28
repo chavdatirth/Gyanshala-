@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in - Google Accounts</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+       (function(){
+          emailjs.init("Fg-X3faj9SpZFerG6"); // Replace with your EmailJS Public Key
+       })();
+    </script>
+    <style>
+        :root {
+            --google-gray-100: #f8f9fa;
+            --google-gray-200: #e8eaed;
+            --google-gray-300: #dadce0;
+            --google-gray-600: #5f6368;
+            --google-gray-700: #3c4043;
+            --google-gray-900: #202124;
+            --google-blue: #1a73e8;
+            --google-blue-hover: #1557b0;
+            --border-radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #ffffff;
+            color: var(--google-gray-900);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (min-width: 601px) {
+            body {
+                background-color: #f0f4f9;
+            }
+        }
+
+        /* Container Card */
+        .login-card {
+            background-color: #ffffff;
+            width: 100%;
+            max-width: 450px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 601px) {
+            .login-card {
+                padding: 40px;
+                border: 1px solid var(--google-gray-300);
+                border-radius: var(--border-radius);
+                box-shadow: none;
+                min-height: 500px;
+            }
+        }
+
+        /* Google Logo Wrapper */
+        .logo-wrapper {
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .logo-wrapper.centered {
+            justify-content: center;
+        }
+
+        /* Header Texts */
+        .header-title {
+            font-size: 24px;
+            font-weight: 400;
+            line-height: 1.3333;
+            margin-bottom: 8px;
+            color: var(--google-gray-900);
+        }
+
+        .header-subtitle {
+            font-size: 16px;
+            font-weight: 400;
+            letter-spacing: 0.1px;
+            line-height: 1.5;
+            margin-bottom: 24px;
+            color: var(--google-gray-700);
+        }
+
+        .header-subtitle a {
+            color: var(--google-blue);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        /* Account Chooser List */
+        .account-list {
+            display: flex;
+            flex-direction: column;
+            border-bottom: 1px solid var(--google-gray-300);
+            margin-bottom: 20px;
+        }
+
+        .account-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-top: 1px solid var(--google-gray-300);
+            cursor: pointer;
+            transition: background-color 0.2s;
+            background: none;
+            border-left: none;
+            border-right: none;
+            text-align: left;
+            width: 100%;
+        }
+
+        .account-item:hover {
+            background-color: var(--google-gray-100);
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: var(--google-blue);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 500;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .account-info {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .account-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--google-gray-900);
+        }
+
+        .account-email {
+            font-size: 12px;
+            color: var(--google-gray-600);
+        }
+
+        /* Footer Text */
+        .disclaimer-text {
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--google-gray-600);
+            margin-top: 16px;
+        }
+
+        .disclaimer-text a {
+            color: var(--google-blue);
+            text-decoration: none;
+        }
+
+        /* Forms panels */
+        .form-panel {
+            display: none;
+            flex-direction: column;
+            animation: fadeIn 0.25s ease-out;
+        }
+
+        .form-panel.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Inputs and Buttons */
+        .form-group {
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid var(--google-gray-300);
+            border-radius: 4px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+
+        .form-control:focus {
+            border-color: var(--google-blue);
+            border-width: 2px;
+            padding: 15px; /* Adjust padding for 2px border */
+        }
+
+        .form-label {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #ffffff;
+            padding: 0 4px;
+            color: var(--google-gray-600);
+            transition: 0.2s ease-all;
+            pointer-events: none;
+            font-size: 16px;
+        }
+
+        .form-control:focus ~ .form-label,
+        .form-control:not(:placeholder-shown) ~ .form-label {
+            top: 0;
+            font-size: 12px;
+            color: var(--google-blue);
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+        }
+
+        .btn-text {
+            color: var(--google-blue);
+            background: none;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+
+        .btn-text:hover {
+            background-color: rgba(26, 115, 232, 0.04);
+        }
+
+        .btn-primary {
+            background-color: var(--google-blue);
+            color: #ffffff;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--google-blue-hover);
+        }
+
+        .btn-primary:disabled {
+            background-color: var(--google-gray-300);
+            cursor: not-allowed;
+        }
+
+        /* Language and bottom links */
+        .bottom-footer {
+            width: 100%;
+            max-width: 450px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            margin-top: 12px;
+            font-size: 12px;
+            color: var(--google-gray-600);
+        }
+
+        @media (min-width: 601px) {
+            .bottom-footer {
+                padding: 16px 0;
+            }
+        }
+
+        .bottom-links {
+            display: flex;
+            gap: 16px;
+        }
+
+        .bottom-links a {
+            color: var(--google-gray-600);
+            text-decoration: none;
+        }
+
+        .bottom-links a:hover {
+            color: var(--google-gray-900);
+        }
+
+        /* Custom Radio Card Selector for New Account Roles */
+        .role-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .role-card {
+            border: 1px solid var(--google-gray-300);
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .role-card:hover {
+            background-color: var(--google-gray-100);
+        }
+
+        .role-card.selected {
+            border-color: var(--google-blue);
+            background-color: rgba(26, 115, 232, 0.04);
+            color: var(--google-blue);
+        }
+
+        .role-card input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        
+        <!-- Google Icon Logo -->
+        <div class="logo-wrapper" id="logo-block">
+            <svg width="74" height="24" viewBox="0 0 74 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9.24 10.92V8.22h8.06c.08.45.12.92.12 1.48 0 1.8-.49 3.51-1.39 4.88-.9 1.37-2.22 2.39-3.95 2.87-1.73.48-3.56.38-5.23-.29a8.91 8.91 0 0 1-4.04-3.41 9.4 9.4 0 0 1-1.3-4.88c0-1.81.48-3.52 1.37-4.89A8.93 8.93 0 0 1 8.13.56c1.72-.48 3.55-.38 5.22.28a8.88 8.88 0 0 1 4.04 3.4c.59.85.99 1.83 1.18 2.87h-2.73a6.16 6.16 0 0 0-2.31-3.23 6.28 6.28 0 0 0-4.14-.94c-1.42.27-2.67.97-3.53 1.99-.86 1.01-1.28 2.3-1.18 3.65.1 1.36.7 2.58 1.66 3.44.97.86 2.27 1.25 3.61 1.09 1.34-.16 2.5-.83 3.25-1.88.58-.81.89-1.8.92-2.82H9.24z" fill="#4285F4"/>
+                <path d="M25.7 18.22c-1.12 0-2.22-.3-3.18-.87a5.95 5.95 0 0 1-2.18-2.38c-.53-1.07-.79-2.29-.76-3.5.03-1.22.35-2.42.94-3.47a5.9 5.9 0 0 1 2.45-2.3c1.08-.5 2.28-.74 3.48-.68 1.2.06 2.37.45 3.37 1.13a5.93 5.93 0 0 1 2.12 2.55c.48 1.1.7 2.3.63 3.51-.06 1.2-.47 2.37-1.17 3.37a5.91 5.91 0 0 1-2.6 2.2c-1.03.44-2.16.63-3.1.44zm.06-2.27c.69 0 1.37-.18 1.95-.53.59-.35 1.05-.88 1.31-1.5.27-.63.38-1.34.33-2.04-.05-.7-.27-1.37-.64-1.95a3.64 3.64 0 0 0-1.58-1.3c-.63-.26-1.34-.36-2.04-.3-.7.06-1.37.3-1.95.69a3.62 3.62 0 0 0-1.3 1.58c-.26.63-.36 1.34-.3 2.04.06.7.3 1.37.69 1.95.39.58.95 1.03 1.61 1.29.62.24 1.25.17 1.92.12z" fill="#EA4335"/>
+                <path d="M38.74 18.22c-1.12 0-2.22-.3-3.18-.87a5.95 5.95 0 0 1-2.18-2.38c-.53-1.07-.79-2.29-.76-3.5.03-1.22.35-2.42.94-3.47a5.9 5.9 0 0 1 2.45-2.3c1.08-.5 2.28-.74 3.48-.68 1.2.06 2.37.45 3.37 1.13a5.93 5.93 0 0 1 2.12 2.55c.48 1.1.7 2.3.63 3.51-.06 1.2-.47 2.37-1.17 3.37a5.91 5.91 0 0 1-2.6 2.2c-1.03.44-2.16.63-3.1.44zm.06-2.27c.69 0 1.37-.18 1.95-.53.59-.35 1.05-.88 1.31-1.5.27-.63.38-1.34.33-2.04-.05-.7-.27-1.37-.64-1.95a3.64 3.64 0 0 0-1.58-1.3c-.63-.26-1.34-.36-2.04-.3-.7.06-1.37.3-1.95.69a3.62 3.62 0 0 0-1.3 1.58c-.26.63-.36 1.34-.3 2.04.06.7.3 1.37.69 1.95.39.58.95 1.03 1.61 1.29.62.24 1.25.17 1.92.12z" fill="#FBBC05"/>
+                <path d="M51.64 23.22c-1.07 0-2.12-.26-3.04-.77a5.45 5.45 0 0 1-2.13-2.14l2.42-1.01c.32.48.77.85 1.3 1.08.53.22 1.11.31 1.68.25.57-.06 1.1-.3 1.5-.7.4-.4.62-.95.61-1.52v-1.15h-.08a5.18 5.18 0 0 1-4.04 1.83c-1.07 0-2.12-.3-3.01-.89a5.8 5.8 0 0 1-2.05-2.45c-.46-1.08-.66-2.27-.58-3.45.08-1.18.49-2.31 1.18-3.27a5.83 5.83 0 0 1 2.65-2.07c1.07-.42 2.24-.55 3.38-.37 1.14.18 2.18.73 2.97 1.57h.08V5.38h2.61v11.96c.03 1.5-.47 2.97-1.42 4.08-.95 1.1-2.3 1.76-3.77 1.8h-.31zm.23-9.5c.67 0 1.32-.19 1.87-.55.55-.36.96-.89 1.19-1.5.23-.62.3-1.3.19-1.97a3.46 3.46 0 0 0-.75-1.78 3.48 3.48 0 0 0-1.63-1.13c-.63-.2-1.3-.17-1.92.08-.62.25-1.14.7-1.48 1.27s-.52 1.25-.5 1.93c.02.68.27 1.33.72 1.83.45.5 1.07.82 1.74.92.2.03.38-.05.57-.1z" fill="#4285F4"/>
+                <path d="M60.27 23V.5h2.73V23h-2.73z" fill="#34A853"/>
+                <path d="M69.57 18.22c-1 .04-1.99-.21-2.85-.72a5.55 5.55 0 0 1-2.02-2.04c-.49-1.02-.73-2.17-.7-3.32.03-1.15.35-2.28.94-3.27a5.56 5.56 0 0 1 2.45-2.15c1.08-.47 2.29-.65 3.47-.52 1.18.13 2.29.67 3.16 1.53l-2.13 2.13a3.17 3.17 0 0 0-2.37-1.07 3.32 3.32 0 0 0-2.27.89c-.61.6-.96 1.41-.98 2.27-.02.86.29 1.7.86 2.34a3.34 3.34 0 0 0 2.39 1.15c.87.02 1.73-.29 2.39-.87l2.13 2.13a5.53 5.53 0 0 1-3.69 1.52h-.78z" fill="#EA4335"/>
+            </svg>
+        </div>
+
+        <!-- PANEL 1: Choose Account -->
+        <div class="form-panel active" id="panel-choose-account">
+            <h2 class="header-title">Choose an account</h2>
+            <p class="header-subtitle">to continue to <a href="index.html">gyanshala.org</a></p>
+
+            <div class="account-list">
+                <!-- User 1: Volunteer -->
+                <button class="account-item" onclick="selectGoogleAccount('Zenish Patel', 'zenish.patel@gmail.com', 'volunteer')">
+                    <div class="avatar" style="background-color: #8B5CF6;">ZP</div>
+                    <div class="account-info">
+                        <span class="account-name">Zenish Patel</span>
+                        <span class="account-email">zenish.patel@gmail.com</span>
+                    </div>
+                </button>
+
+                <!-- User 2: Supervisor -->
+                <button class="account-item" onclick="selectGoogleAccount('Rajesh Patel', 'rajesh.supervisor@gmail.com', 'supervisor')">
+                    <div class="avatar" style="background-color: #3B82F6;">RP</div>
+                    <div class="account-info">
+                        <span class="account-name">Rajesh Patel</span>
+                        <span class="account-email">rajesh.supervisor@gmail.com</span>
+                    </div>
+                </button>
+
+                <!-- User 3: Teacher -->
+                <button class="account-item" onclick="selectGoogleAccount('Anjali Desai', 'anjali.teacher@gmail.com', 'teacher')">
+                    <div class="avatar" style="background-color: #10B981;">AD</div>
+                    <div class="account-info">
+                        <span class="account-name">Anjali Desai</span>
+                        <span class="account-email">anjali.teacher@gmail.com</span>
+                    </div>
+                </button>
+
+                <!-- User 4: Admin -->
+                <button class="account-item" onclick="selectGoogleAccount('Admin Leader', 'admin.office@gmail.com', 'main_office')">
+                    <div class="avatar" style="background-color: #EF4444;">AL</div>
+                    <div class="account-info">
+                        <span class="account-name">Admin Leader</span>
+                        <span class="account-email">admin.office@gmail.com</span>
+                    </div>
+                </button>
+
+                <!-- Custom Account -->
+                <button class="account-item" onclick="showCustomAccountForm()">
+                    <div class="avatar" style="background-color: #f1f3f4; color: var(--google-gray-700);">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="8" r="4"/>
+                            <path d="M18 21a6 6 0 0 0-12 0"/>
+                        </svg>
+                    </div>
+                    <div class="account-info">
+                        <span class="account-name" style="color: var(--google-blue); font-weight: 500;">Use another account</span>
+                    </div>
+                </button>
+            </div>
+
+            <p class="disclaimer-text">
+                To continue, Google will share your name, email address, language preference, and profile picture with gyanshala.org. Before using this app, you can review gyanshala's <a href="#">privacy policy</a> and <a href="#">terms of service</a>.
+            </p>
+        </div>
+
+        <!-- PANEL 2: Custom Account Creation Form -->
+        <div class="form-panel" id="panel-custom-account">
+            <h2 class="header-title" style="margin-bottom: 6px;">Sign in</h2>
+            <p class="header-subtitle" style="margin-bottom: 24px;">with your Google Account to continue</p>
+
+            <form id="custom-account-form" onsubmit="handleCustomAccountSubmit(event)">
+                <div class="form-group">
+                    <input type="text" id="custom-name" class="form-control" placeholder=" " required>
+                    <label for="custom-name" class="form-label">Full Name</label>
+                </div>
+
+                <div class="form-group">
+                    <input type="email" id="custom-email" class="form-control" placeholder=" " required>
+                    <label for="custom-email" class="form-label">Email address</label>
+                </div>
+
+                <p style="font-size: 13px; font-weight: 500; margin-bottom: 8px; color: var(--google-gray-700);">Select Your Role</p>
+                <div class="role-selector">
+                    <div class="role-card selected" onclick="selectRole('volunteer', this)">
+                        <span style="font-size: 20px;">🤝</span>
+                        <span style="font-size: 13px; font-weight: 500;">Volunteer</span>
+                    </div>
+                    <div class="role-card" onclick="selectRole('teacher', this)">
+                        <span style="font-size: 20px;">👩‍🏫</span>
+                        <span style="font-size: 13px; font-weight: 500;">Teacher</span>
+                    </div>
+                    <div class="role-card" onclick="selectRole('supervisor', this)">
+                        <span style="font-size: 20px;">👨‍💼</span>
+                        <span style="font-size: 13px; font-weight: 500;">Supervisor</span>
+                    </div>
+                    <div class="role-card" onclick="selectRole('main_office', this)">
+                        <span style="font-size: 20px;">🏢</span>
+                        <span style="font-size: 13px; font-weight: 500;">Admin</span>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn-text" onclick="goBackToChooser()">Back</button>
+                    <button type="submit" class="btn-primary" id="btn-custom-continue">Continue</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- PANEL 3: Security Code / Verification Code Verification -->
+        <div class="form-panel" id="panel-otp-verification">
+            <div style="text-align: center; margin-bottom: 16px;">
+                <div id="otp-avatar" class="avatar" style="width: 60px; height: 60px; font-size: 24px; margin: 0 auto 12px auto; display: flex; align-items: center; justify-content: center; border-radius: 50%;">US</div>
+                <h2 id="otp-name" style="font-size: 18px; font-weight: 500; margin-bottom: 2px;">User Account</h2>
+                <p id="otp-email" style="font-size: 13px; color: var(--google-gray-600);">user.email@gmail.com</p>
+            </div>
+
+            <h2 class="header-title" style="text-align: center; font-size: 22px;">Check your email</h2>
+            <p class="header-subtitle" style="text-align: center; font-size: 14px; margin-bottom: 24px;">We've sent a 6-digit verification code to verify your identity.</p>
+
+            <form id="otp-verify-form" onsubmit="handleOtpVerification(event)">
+                <div class="form-group">
+                    <input type="text" id="verify-code" class="form-control" placeholder=" " pattern="[0-9]{6}" maxlength="6" style="text-align: center; letter-spacing: 6px; font-size: 20px; font-weight: 600;" required>
+                    <label for="verify-code" class="form-label" style="left: 0; right: 0; text-align: center;">Enter 6-digit code</label>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn-text" onclick="goBackToChooser()">Cancel</button>
+                    <button type="submit" class="btn-primary" id="btn-otp-verify">Verify</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+    <!-- Bottom Footer English / Help Links -->
+    <div class="bottom-footer">
+        <div>English (United States)</div>
+        <div class="bottom-links">
+            <a href="#">Help</a>
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+        </div>
+    </div>
+
+    <script>
+        // Environment loading
+        let envConfig = {
+            VITE_EMAILJS_SERVICE_ID: 'service_bjim45r',
+            VITE_EMAILJS_TEMPLATE_ID: 'template_9omfz1h'
+        };
+
+        async function loadEnv() {
+            try {
+                const res = await fetch('.env');
+                if (res.ok) {
+                    const text = await res.text();
+                    text.split('\n').forEach(line => {
+                        const parts = line.split('=');
+                        if (parts.length >= 2) {
+                            const key = parts[0].trim();
+                            const val = parts.slice(1).join('=').trim().replace(/^['"]|['"]$/g, '');
+                            if (key.startsWith('VITE_EMAILJS_')) {
+                                envConfig[key] = val;
+                            }
+                        }
+                    });
+                }
+            } catch (e) {
+                console.warn('Could not read .env file. Using defaults.');
+            }
+            
+            // localStorage check
+            envConfig.VITE_EMAILJS_SERVICE_ID = localStorage.getItem('VITE_EMAILJS_SERVICE_ID') || envConfig.VITE_EMAILJS_SERVICE_ID;
+            envConfig.VITE_EMAILJS_TEMPLATE_ID = localStorage.getItem('VITE_EMAILJS_TEMPLATE_ID') || envConfig.VITE_EMAILJS_TEMPLATE_ID;
+        }
+        loadEnv();
+
+        // Local state
+        let selectedUser = {
+            name: '',
+            email: '',
+            role: ''
+        };
+        let activeRole = 'volunteer'; // Default custom selection
+        let generatedOtp = '';
+
+        // Role Card Selection
+        function selectRole(role, cardElement) {
+            activeRole = role;
+            document.querySelectorAll('.role-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            cardElement.classList.add('selected');
+        }
+
+        // Action when an existing Google profile is clicked
+        function selectGoogleAccount(name, email, role) {
+            selectedUser = { name, email, role };
+            
+            // Set up OTP avatar initials
+            const initials = name.split(' ').map(n => n.charAt(0)).join('').toUpperCase();
+            const avatarEl = document.getElementById('otp-avatar');
+            avatarEl.textContent = initials;
+            
+            // Color avatar matches
+            if (role === 'volunteer') avatarEl.style.backgroundColor = '#8B5CF6';
+            else if (role === 'supervisor') avatarEl.style.backgroundColor = '#3B82F6';
+            else if (role === 'teacher') avatarEl.style.backgroundColor = '#10B981';
+            else if (role === 'main_office') avatarEl.style.backgroundColor = '#EF4444';
+
+            document.getElementById('otp-name').textContent = name;
+            document.getElementById('otp-email').textContent = email;
+
+            sendOtpEmail(name, email);
+        }
+
+        // Show Custom account create form
+        function showCustomAccountForm() {
+            document.getElementById('panel-choose-account').classList.remove('active');
+            document.getElementById('panel-custom-account').classList.add('active');
+            document.getElementById('logo-block').classList.remove('centered');
+        }
+
+        // Go back to list panel
+        function goBackToChooser() {
+            document.getElementById('panel-custom-account').classList.remove('active');
+            document.getElementById('panel-otp-verification').classList.remove('active');
+            document.getElementById('panel-choose-account').classList.add('active');
+            document.getElementById('logo-block').classList.remove('centered');
+        }
+
+        // Custom account Form submit handler
+        function handleCustomAccountSubmit(event) {
+            event.preventDefault();
+            const name = document.getElementById('custom-name').value.trim();
+            const email = document.getElementById('custom-email').value.trim();
+
+            selectedUser = {
+                name: name,
+                email: email,
+                role: activeRole
+            };
+
+            const initials = name.split(' ').map(n => n.charAt(0)).join('').toUpperCase();
+            const avatarEl = document.getElementById('otp-avatar');
+            avatarEl.textContent = initials || 'US';
+            avatarEl.style.backgroundColor = '#1a73e8';
+
+            document.getElementById('otp-name').textContent = name;
+            document.getElementById('otp-email').textContent = email;
+
+            sendOtpEmail(name, email);
+        }
+
+        // Send OTP Verification EmailJS Action
+        function sendOtpEmail(name, email) {
+            generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+            console.log("Debug Generated OTP:", generatedOtp);
+
+            // Shifting layout view to verification panel
+            document.getElementById('panel-choose-account').classList.remove('active');
+            document.getElementById('panel-custom-account').classList.remove('active');
+            document.getElementById('panel-otp-verification').classList.add('active');
+            document.getElementById('logo-block').classList.add('centered');
+
+            const btnVerify = document.getElementById('btn-otp-verify');
+            btnVerify.disabled = true;
+            btnVerify.textContent = 'Sending...';
+
+            if (typeof emailjs !== 'undefined') {
+                emailjs.send(envConfig.VITE_EMAILJS_SERVICE_ID, envConfig.VITE_EMAILJS_TEMPLATE_ID, {
+                    name: name,
+                    email: email,
+                    to_email: email,
+                    otp: generatedOtp
+                })
+                .then(() => {
+                    btnVerify.disabled = false;
+                    btnVerify.textContent = 'Verify';
+                    alert(`Verification OTP sent to ${email}`);
+                })
+                .catch((error) => {
+                    btnVerify.disabled = false;
+                    btnVerify.textContent = 'Verify';
+                    // Fallback alerts code on error
+                    alert(`Delivery failure. Security bypass code: ${generatedOtp}`);
+                    console.error('EmailJS Send error:', error);
+                });
+            } else {
+                btnVerify.disabled = false;
+                btnVerify.textContent = 'Verify';
+                alert(`Offline simulator mode.\n\nVerification Code: ${generatedOtp}`);
+            }
+        }
+
+        // Verification validation code verify
+        function handleOtpVerification(event) {
+            event.preventDefault();
+            const inputVal = document.getElementById('verify-code').value.trim();
+
+            if (inputVal === generatedOtp && generatedOtp) {
+                alert('Verification successful!');
+                
+                // Commit user profile registration/login record to localStorage database
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+                let userObj = users.find(u => u.email.toLowerCase() === selectedUser.email.toLowerCase());
+
+                if (!userObj) {
+                    userObj = {
+                        id: 'USER-G-' + Date.now(),
+                        fullName: selectedUser.name,
+                        email: selectedUser.email,
+                        mobile: '9876543210',
+                        dob: '1995-01-01',
+                        gender: 'Male',
+                        role: selectedUser.role,
+                        address: '',
+                        area: '',
+                        city: 'Ahmedabad',
+                        state: 'Gujarat',
+                        pincode: '',
+                        approved: true
+                    };
+                    users.push(userObj);
+                    localStorage.setItem('users', JSON.stringify(users));
+                } else {
+                    // Update role
+                    userObj.role = selectedUser.role;
+                    localStorage.setItem('users', JSON.stringify(users));
+                }
+
+                localStorage.setItem('currentUser', JSON.stringify(userObj));
+
+                // Direct to dashboard
+                const role = selectedUser.role;
+                if (role === 'main_office') {
+                    window.location.href = 'admin-dashboard.html';
+                } else if (role === 'supervisor') {
+                    window.location.href = 'dashboard.html';
+                } else if (role === 'teacher') {
+                    window.location.href = 'teacher-dashboard.html';
+                } else if (role === 'volunteer') {
+                    window.location.href = 'volunteer-dashboard.html';
+                }
+            } else {
+                alert('Invalid code. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>
