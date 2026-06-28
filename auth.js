@@ -43,6 +43,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmPasswordInput = document.getElementById('confirm_password');
     const strengthBar = document.getElementById('password-strength');
     const strengthText = document.getElementById('strength-text');
+
+    // Auto-select role from URL query parameter (e.g. ?role=volunteer)
+    const urlParams = new URLSearchParams(window.location.search);
+    const roleParam = urlParams.get('role');
+    const roleSelect = document.getElementById('role');
+    if (roleSelect && roleParam) {
+        roleSelect.value = roleParam;
+    }
     
     // Register Multi-step Wizard Nodes
     const step1Panel = document.getElementById('register-step-1');

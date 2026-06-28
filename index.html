@@ -38,17 +38,23 @@
 
     <!-- Mobile Menu Overlay -->
     <div class="mobile-menu-overlay">
-        <nav class="mobile-nav">
-            <ul class="mobile-nav-links">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#centers">Learning Centers</a></li>
-                <li><a href="#programs">Programs</a></li>
-                <li><a href="#stories">Success Stories</a></li>
-                <li><a href="#volunteer">Volunteer</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-        </nav>
+        <div class="mobile-menu-wrapper">
+            <nav class="mobile-nav">
+                <ul class="mobile-nav-links">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#centers">Learning Centers</a></li>
+                    <li><a href="#programs">Programs</a></li>
+                    <li><a href="#stories">Success Stories</a></li>
+                    <li><a href="#volunteer">Volunteer</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="mobile-menu-actions">
+                <a href="login.html" class="btn-text">Login</a>
+                <a href="register.html?role=volunteer" class="btn-primary">Volunteer Now</a>
+            </div>
+        </div>
     </div>
 
     <!-- Hero Section -->
@@ -68,7 +74,7 @@
                 <p>Providing free quality education to children from underserved communities through neighborhood learning centers.</p>
                 <div class="hero-buttons">
                     <a href="#programs" class="btn-primary">Explore Our Programs</a>
-                    <a href="#volunteer" class="btn-secondary">Become a Volunteer</a>
+                    <a href="register.html?role=volunteer" class="btn-secondary">Become a Volunteer</a>
                 </div>
             </div>
         </div>
@@ -306,7 +312,7 @@
                     <li>✓ Join a community of changemakers</li>
                     <li>✓ Flexible hours (2-4 hours a week)</li>
                 </ul>
-                <a href="#" class="btn-secondary">Apply to Volunteer</a>
+                <a href="register.html?role=volunteer" class="btn-secondary">Apply to Volunteer</a>
             </div>
             <div class="volunteer-image-wrapper">
                 <img src="images/volunteer_illustration_1782536659447.jpg" alt="Volunteer" class="vol-img">
@@ -411,25 +417,38 @@
         // Dynamic Active Session check to link dashboards directly
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
         if (currentUser) {
-            const loginBtn = document.querySelector('.header-actions a[href="login.html"]');
-            if (loginBtn) {
-                loginBtn.textContent = 'Go to Dashboard';
-                loginBtn.classList.remove('btn-text');
-                loginBtn.classList.add('btn-primary');
-                // Hide volunteer button if logged in for cleaner header space
-                const volBtn = document.querySelector('.header-actions a[href="register.html?role=volunteer"]');
-                if (volBtn) volBtn.style.display = 'none';
+            const desktopLoginBtn = document.querySelector('.header-actions a[href="login.html"]');
+            const mobileLoginBtn = document.querySelector('.mobile-menu-actions a[href="login.html"]');
+            
+            [desktopLoginBtn, mobileLoginBtn].forEach(loginBtn => {
+                if (loginBtn) {
+                    loginBtn.textContent = 'Go to Dashboard';
+                    loginBtn.classList.remove('btn-text');
+                    loginBtn.classList.add('btn-primary');
+                    loginBtn.style.textAlign = 'center';
+                    loginBtn.style.width = '100%';
+                    loginBtn.style.padding = '12px 24px';
+                    loginBtn.style.borderRadius = '12px';
+                    loginBtn.style.fontWeight = '600';
+                    loginBtn.style.textDecoration = 'none';
 
-                if (currentUser.role === 'main_office') {
-                    loginBtn.href = 'admin-dashboard.html';
-                } else if (currentUser.role === 'supervisor') {
-                    loginBtn.href = 'dashboard.html';
-                } else if (currentUser.role === 'teacher') {
-                    loginBtn.href = 'teacher-dashboard.html';
-                } else if (currentUser.role === 'volunteer') {
-                    loginBtn.href = 'volunteer-dashboard.html';
+                    if (currentUser.role === 'main_office') {
+                        loginBtn.href = 'admin-dashboard.html';
+                    } else if (currentUser.role === 'supervisor') {
+                        loginBtn.href = 'dashboard.html';
+                    } else if (currentUser.role === 'teacher') {
+                        loginBtn.href = 'teacher-dashboard.html';
+                    } else if (currentUser.role === 'volunteer') {
+                        loginBtn.href = 'volunteer-dashboard.html';
+                    }
                 }
-            }
+            });
+
+            // Hide volunteer button if logged in for cleaner header space
+            const desktopVolBtn = document.querySelector('.header-actions a[href="register.html?role=volunteer"]');
+            const mobileVolBtn = document.querySelector('.mobile-menu-actions a[href="register.html?role=volunteer"]');
+            if (desktopVolBtn) desktopVolBtn.style.display = 'none';
+            if (mobileVolBtn) mobileVolBtn.style.display = 'none';
         }
     </script>
 </body>
