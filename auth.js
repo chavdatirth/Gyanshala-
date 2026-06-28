@@ -491,6 +491,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     { theme: "outline", size: "large", width: btnWidth }
                 );
                 google.accounts.id.prompt();
+
+                // Append local file:/// protocol safety check warning
+                if (location.protocol === 'file:') {
+                    const btnContainer = document.getElementById("google-btn-container");
+                    if (btnContainer && !document.getElementById('google-file-warning')) {
+                        const warningMsg = document.createElement('div');
+                        warningMsg.id = 'google-file-warning';
+                        warningMsg.style.color = '#ef4444';
+                        warningMsg.style.fontSize = '0.8rem';
+                        warningMsg.style.marginTop = '-16px';
+                        warningMsg.style.marginBottom = '16px';
+                        warningMsg.style.textAlign = 'center';
+                        warningMsg.style.fontWeight = '500';
+                        warningMsg.style.lineHeight = '1.4';
+                        warningMsg.innerHTML = '⚠️ Google Sign-In requires a local web server (cannot run from file:/// browser URL).';
+                        btnContainer.parentNode.insertBefore(warningMsg, btnContainer.nextSibling);
+                    }
+                }
             }
         }
     }
