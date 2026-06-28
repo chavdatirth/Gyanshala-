@@ -5,13 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign in - Google Accounts</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <!-- EmailJS SDK -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-    <script type="text/javascript">
-       (function(){
-          emailjs.init("Fg-X3faj9SpZFerG6"); // Replace with your EmailJS Public Key
-       })();
-    </script>
     <style>
         :root {
             --google-gray-100: #f8f9fa;
@@ -217,7 +210,7 @@
         .form-control:focus {
             border-color: var(--google-blue);
             border-width: 2px;
-            padding: 15px; /* Adjust padding for 2px border */
+            padding: 15px;
         }
 
         .form-label {
@@ -278,11 +271,6 @@
 
         .btn-primary:hover {
             background-color: var(--google-blue-hover);
-        }
-
-        .btn-primary:disabled {
-            background-color: var(--google-gray-300);
-            cursor: not-allowed;
         }
 
         /* Language and bottom links */
@@ -447,26 +435,6 @@
                     <label for="custom-email" class="form-label">Email address</label>
                 </div>
 
-                <p style="font-size: 13px; font-weight: 500; margin-bottom: 8px; color: var(--google-gray-700);">Select Your Role</p>
-                <div class="role-selector">
-                    <div class="role-card selected" onclick="selectRole('volunteer', this)">
-                        <span style="font-size: 20px;">🤝</span>
-                        <span style="font-size: 13px; font-weight: 500;">Volunteer</span>
-                    </div>
-                    <div class="role-card" onclick="selectRole('teacher', this)">
-                        <span style="font-size: 20px;">👩‍🏫</span>
-                        <span style="font-size: 13px; font-weight: 500;">Teacher</span>
-                    </div>
-                    <div class="role-card" onclick="selectRole('supervisor', this)">
-                        <span style="font-size: 20px;">👨‍💼</span>
-                        <span style="font-size: 13px; font-weight: 500;">Supervisor</span>
-                    </div>
-                    <div class="role-card" onclick="selectRole('main_office', this)">
-                        <span style="font-size: 20px;">🏢</span>
-                        <span style="font-size: 13px; font-weight: 500;">Admin</span>
-                    </div>
-                </div>
-
                 <div class="btn-group">
                     <button type="button" class="btn-text" onclick="goBackToChooser()">Back</button>
                     <button type="submit" class="btn-primary" id="btn-custom-continue">Continue</button>
@@ -474,26 +442,40 @@
             </form>
         </div>
 
-        <!-- PANEL 3: Security Code / Verification Code Verification -->
-        <div class="form-panel" id="panel-otp-verification">
+        <!-- PANEL 3: Select Role Only -->
+        <div class="form-panel" id="panel-select-role">
             <div style="text-align: center; margin-bottom: 16px;">
-                <div id="otp-avatar" class="avatar" style="width: 60px; height: 60px; font-size: 24px; margin: 0 auto 12px auto; display: flex; align-items: center; justify-content: center; border-radius: 50%;">US</div>
-                <h2 id="otp-name" style="font-size: 18px; font-weight: 500; margin-bottom: 2px;">User Account</h2>
-                <p id="otp-email" style="font-size: 13px; color: var(--google-gray-600);">user.email@gmail.com</p>
+                <div id="role-avatar" class="avatar" style="width: 60px; height: 60px; font-size: 24px; margin: 0 auto 12px auto; display: flex; align-items: center; justify-content: center; border-radius: 50%;">US</div>
+                <h2 id="role-name" style="font-size: 18px; font-weight: 500; margin-bottom: 2px;">User Account</h2>
+                <p id="role-email" style="font-size: 13px; color: var(--google-gray-600);">user.email@gmail.com</p>
             </div>
 
-            <h2 class="header-title" style="text-align: center; font-size: 22px;">Check your email</h2>
-            <p class="header-subtitle" style="text-align: center; font-size: 14px; margin-bottom: 24px;">We've sent a 6-digit verification code to verify your identity.</p>
+            <h2 class="header-title" style="text-align: center; font-size: 22px;">Select your role</h2>
+            <p class="header-subtitle" style="text-align: center; font-size: 14px; margin-bottom: 20px;">Choose your role in Gyan Shala to complete sync</p>
 
-            <form id="otp-verify-form" onsubmit="handleOtpVerification(event)">
-                <div class="form-group">
-                    <input type="text" id="verify-code" class="form-control" placeholder=" " pattern="[0-9]{6}" maxlength="6" style="text-align: center; letter-spacing: 6px; font-size: 20px; font-weight: 600;" required>
-                    <label for="verify-code" class="form-label" style="left: 0; right: 0; text-align: center;">Enter 6-digit code</label>
+            <form id="role-select-form" onsubmit="handleRoleSubmit(event)">
+                <div class="role-selector">
+                    <div class="role-card selected" onclick="selectRoleOnly('volunteer', this)">
+                        <span style="font-size: 20px;">🤝</span>
+                        <span style="font-size: 13px; font-weight: 500;">Volunteer</span>
+                    </div>
+                    <div class="role-card" onclick="selectRoleOnly('teacher', this)">
+                        <span style="font-size: 20px;">👩‍🏫</span>
+                        <span style="font-size: 13px; font-weight: 500;">Teacher</span>
+                    </div>
+                    <div class="role-card" onclick="selectRoleOnly('supervisor', this)">
+                        <span style="font-size: 20px;">👨‍💼</span>
+                        <span style="font-size: 13px; font-weight: 500;">Supervisor</span>
+                    </div>
+                    <div class="role-card" onclick="selectRoleOnly('main_office', this)">
+                        <span style="font-size: 20px;">🏢</span>
+                        <span style="font-size: 13px; font-weight: 500;">Admin</span>
+                    </div>
                 </div>
 
                 <div class="btn-group">
-                    <button type="button" class="btn-text" onclick="goBackToChooser()">Cancel</button>
-                    <button type="submit" class="btn-primary" id="btn-otp-verify">Verify</button>
+                    <button type="button" class="btn-text" onclick="goBackToChooser()">Back</button>
+                    <button type="submit" class="btn-primary" id="btn-role-continue">Sync & Continue</button>
                 </div>
             </form>
         </div>
@@ -511,51 +493,18 @@
     </div>
 
     <script>
-        // Environment loading
-        let envConfig = {
-            VITE_EMAILJS_SERVICE_ID: 'service_bjim45r',
-            VITE_EMAILJS_TEMPLATE_ID: 'template_9omfz1h'
-        };
-
-        async function loadEnv() {
-            try {
-                const res = await fetch('.env');
-                if (res.ok) {
-                    const text = await res.text();
-                    text.split('\n').forEach(line => {
-                        const parts = line.split('=');
-                        if (parts.length >= 2) {
-                            const key = parts[0].trim();
-                            const val = parts.slice(1).join('=').trim().replace(/^['"]|['"]$/g, '');
-                            if (key.startsWith('VITE_EMAILJS_')) {
-                                envConfig[key] = val;
-                            }
-                        }
-                    });
-                }
-            } catch (e) {
-                console.warn('Could not read .env file. Using defaults.');
-            }
-            
-            // localStorage check
-            envConfig.VITE_EMAILJS_SERVICE_ID = localStorage.getItem('VITE_EMAILJS_SERVICE_ID') || envConfig.VITE_EMAILJS_SERVICE_ID;
-            envConfig.VITE_EMAILJS_TEMPLATE_ID = localStorage.getItem('VITE_EMAILJS_TEMPLATE_ID') || envConfig.VITE_EMAILJS_TEMPLATE_ID;
-        }
-        loadEnv();
-
         // Local state
         let selectedUser = {
             name: '',
             email: '',
-            role: ''
+            role: 'volunteer'
         };
-        let activeRole = 'volunteer'; // Default custom selection
-        let generatedOtp = '';
+        let activeRole = 'volunteer';
 
-        // Role Card Selection
-        function selectRole(role, cardElement) {
+        // Select Role Only inside dynamic selector
+        function selectRoleOnly(role, cardElement) {
             activeRole = role;
-            document.querySelectorAll('.role-card').forEach(card => {
+            document.querySelectorAll('#panel-select-role .role-card').forEach(card => {
                 card.classList.remove('selected');
             });
             cardElement.classList.add('selected');
@@ -565,9 +514,9 @@
         function selectGoogleAccount(name, email, role) {
             selectedUser = { name, email, role };
             
-            // Set up OTP avatar initials
+            // Set up role avatar initials
             const initials = name.split(' ').map(n => n.charAt(0)).join('').toUpperCase();
-            const avatarEl = document.getElementById('otp-avatar');
+            const avatarEl = document.getElementById('role-avatar');
             avatarEl.textContent = initials;
             
             // Color avatar matches
@@ -576,10 +525,23 @@
             else if (role === 'teacher') avatarEl.style.backgroundColor = '#10B981';
             else if (role === 'main_office') avatarEl.style.backgroundColor = '#EF4444';
 
-            document.getElementById('otp-name').textContent = name;
-            document.getElementById('otp-email').textContent = email;
+            document.getElementById('role-name').textContent = name;
+            document.getElementById('role-email').textContent = email;
 
-            sendOtpEmail(name, email);
+            // Pre-select user's default role
+            activeRole = role;
+            document.querySelectorAll('#panel-select-role .role-card').forEach(card => {
+                card.classList.remove('selected');
+                const onclickText = card.getAttribute('onclick');
+                if (onclickText.includes(`'${role}'`)) {
+                    card.classList.add('selected');
+                }
+            });
+
+            // Transition directly to Select Role panel (No OTP!)
+            document.getElementById('panel-choose-account').classList.remove('active');
+            document.getElementById('panel-select-role').classList.add('active');
+            document.getElementById('logo-block').classList.add('centered');
         }
 
         // Show Custom account create form
@@ -592,7 +554,7 @@
         // Go back to list panel
         function goBackToChooser() {
             document.getElementById('panel-custom-account').classList.remove('active');
-            document.getElementById('panel-otp-verification').classList.remove('active');
+            document.getElementById('panel-select-role').classList.remove('active');
             document.getElementById('panel-choose-account').classList.add('active');
             document.getElementById('logo-block').classList.remove('centered');
         }
@@ -606,112 +568,68 @@
             selectedUser = {
                 name: name,
                 email: email,
-                role: activeRole
+                role: 'volunteer' // Default
             };
 
             const initials = name.split(' ').map(n => n.charAt(0)).join('').toUpperCase();
-            const avatarEl = document.getElementById('otp-avatar');
+            const avatarEl = document.getElementById('role-avatar');
             avatarEl.textContent = initials || 'US';
             avatarEl.style.backgroundColor = '#1a73e8';
 
-            document.getElementById('otp-name').textContent = name;
-            document.getElementById('otp-email').textContent = email;
+            document.getElementById('role-name').textContent = name;
+            document.getElementById('role-email').textContent = email;
 
-            sendOtpEmail(name, email);
-        }
-
-        // Send OTP Verification EmailJS Action
-        function sendOtpEmail(name, email) {
-            generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-            console.log("Debug Generated OTP:", generatedOtp);
-
-            // Shifting layout view to verification panel
-            document.getElementById('panel-choose-account').classList.remove('active');
+            // Transition to Select Role panel
             document.getElementById('panel-custom-account').classList.remove('active');
-            document.getElementById('panel-otp-verification').classList.add('active');
+            document.getElementById('panel-select-role').classList.add('active');
             document.getElementById('logo-block').classList.add('centered');
-
-            const btnVerify = document.getElementById('btn-otp-verify');
-            btnVerify.disabled = true;
-            btnVerify.textContent = 'Sending...';
-
-            if (typeof emailjs !== 'undefined') {
-                emailjs.send(envConfig.VITE_EMAILJS_SERVICE_ID, envConfig.VITE_EMAILJS_TEMPLATE_ID, {
-                    name: name,
-                    email: email,
-                    to_email: email,
-                    otp: generatedOtp
-                })
-                .then(() => {
-                    btnVerify.disabled = false;
-                    btnVerify.textContent = 'Verify';
-                    alert(`Verification OTP sent to ${email}`);
-                })
-                .catch((error) => {
-                    btnVerify.disabled = false;
-                    btnVerify.textContent = 'Verify';
-                    // Fallback alerts code on error
-                    alert(`Delivery failure. Security bypass code: ${generatedOtp}`);
-                    console.error('EmailJS Send error:', error);
-                });
-            } else {
-                btnVerify.disabled = false;
-                btnVerify.textContent = 'Verify';
-                alert(`Offline simulator mode.\n\nVerification Code: ${generatedOtp}`);
-            }
         }
 
-        // Verification validation code verify
-        function handleOtpVerification(event) {
+        // Role select and redirect
+        function handleRoleSubmit(event) {
             event.preventDefault();
-            const inputVal = document.getElementById('verify-code').value.trim();
+            selectedUser.role = activeRole;
+            
+            // Commit user profile to local database
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            let userObj = users.find(u => u.email.toLowerCase() === selectedUser.email.toLowerCase());
 
-            if (inputVal === generatedOtp && generatedOtp) {
-                alert('Verification successful!');
-                
-                // Commit user profile registration/login record to localStorage database
-                const users = JSON.parse(localStorage.getItem('users') || '[]');
-                let userObj = users.find(u => u.email.toLowerCase() === selectedUser.email.toLowerCase());
-
-                if (!userObj) {
-                    userObj = {
-                        id: 'USER-G-' + Date.now(),
-                        fullName: selectedUser.name,
-                        email: selectedUser.email,
-                        mobile: '9876543210',
-                        dob: '1995-01-01',
-                        gender: 'Male',
-                        role: selectedUser.role,
-                        address: '',
-                        area: '',
-                        city: 'Ahmedabad',
-                        state: 'Gujarat',
-                        pincode: '',
-                        approved: true
-                    };
-                    users.push(userObj);
-                    localStorage.setItem('users', JSON.stringify(users));
-                } else {
-                    // Update role
-                    userObj.role = selectedUser.role;
-                    localStorage.setItem('users', JSON.stringify(users));
-                }
-
-                localStorage.setItem('currentUser', JSON.stringify(userObj));
-
-                // Direct to dashboard
-                const role = selectedUser.role;
-                if (role === 'main_office') {
-                    window.location.href = 'admin-dashboard.html';
-                } else if (role === 'supervisor') {
-                    window.location.href = 'dashboard.html';
-                } else if (role === 'teacher') {
-                    window.location.href = 'teacher-dashboard.html';
-                } else if (role === 'volunteer') {
-                    window.location.href = 'volunteer-dashboard.html';
-                }
+            if (!userObj) {
+                userObj = {
+                    id: 'USER-G-' + Date.now(),
+                    fullName: selectedUser.name,
+                    email: selectedUser.email,
+                    mobile: '9876543210',
+                    dob: '1995-01-01',
+                    gender: 'Male',
+                    role: selectedUser.role,
+                    address: '',
+                    area: '',
+                    city: 'Ahmedabad',
+                    state: 'Gujarat',
+                    pincode: '',
+                    approved: true
+                };
+                users.push(userObj);
+                localStorage.setItem('users', JSON.stringify(users));
             } else {
-                alert('Invalid code. Please try again.');
+                userObj.role = selectedUser.role;
+                localStorage.setItem('users', JSON.stringify(users));
+            }
+
+            localStorage.setItem('currentUser', JSON.stringify(userObj));
+            alert(`Google account synced successfully as ${userObj.fullName}!`);
+
+            // Direct to dashboard
+            const role = selectedUser.role;
+            if (role === 'main_office') {
+                window.location.href = 'admin-dashboard.html';
+            } else if (role === 'supervisor') {
+                window.location.href = 'dashboard.html';
+            } else if (role === 'teacher') {
+                window.location.href = 'teacher-dashboard.html';
+            } else if (role === 'volunteer') {
+                window.location.href = 'volunteer-dashboard.html';
             }
         }
     </script>
