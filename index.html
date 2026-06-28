@@ -28,7 +28,6 @@
             </nav>
             <div class="header-actions">
                 <a href="login.html" class="btn-text">Login</a>
-                <a href="register.html?role=volunteer" class="btn-primary">Volunteer Now</a>
             </div>
             <button class="mobile-menu-toggle" aria-label="Toggle menu">
                 <span></span><span></span><span></span>
@@ -443,9 +442,6 @@
                 }
             });
 
-            // Hide volunteer button if logged in for cleaner header space
-            const desktopVolBtn = document.querySelector('.header-actions a[href="register.html?role=volunteer"]');
-            if (desktopVolBtn) desktopVolBtn.style.display = 'none';
         }
     </script>
 </body>
