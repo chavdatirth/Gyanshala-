@@ -27,7 +27,7 @@
                 </ul>
             </nav>
             <div class="header-actions">
-                <a href="login.html" class="btn-text">Login</a>
+                <a href="login.html" class="btn-outline">Login</a>
             </div>
             <button class="mobile-menu-toggle" aria-label="Toggle menu">
                 <span></span><span></span><span></span>
@@ -50,7 +50,7 @@
                 </ul>
             </nav>
             <div class="mobile-menu-actions">
-                <a href="login.html" class="btn-text">Login</a>
+                <a href="login.html" class="btn-primary">Login</a>
             </div>
         </div>
     </div>
@@ -421,7 +421,7 @@
             [desktopLoginBtn, mobileLoginBtn].forEach(loginBtn => {
                 if (loginBtn) {
                     loginBtn.textContent = 'Go to Dashboard';
-                    loginBtn.classList.remove('btn-text');
+                    loginBtn.classList.remove('btn-text', 'btn-outline');
                     loginBtn.classList.add('btn-primary');
                     loginBtn.style.textAlign = 'center';
                     loginBtn.style.width = '100%';

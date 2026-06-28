@@ -1,5 +1,54 @@
 document.addEventListener('DOMContentLoaded', () => {
-    
+    // ==========================================
+    // CUSTOM TOAST NOTIFICATION NOTIFIERS
+    // ==========================================
+    function showToast(message, type = 'info') {
+        let container = document.getElementById('toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+        }
+        
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        let icon = 'ℹ️';
+        if (type === 'success') icon = '✅';
+        else if (type === 'error') icon = '❌';
+        else if (type === 'warning') icon = '⚠️';
+
+        toast.innerHTML = `
+            <span>${icon}</span>
+            <div>${message}</div>
+        `;
+        container.appendChild(toast);
+
+        // Animate in
+        setTimeout(() => toast.classList.add('active'), 50);
+
+        // Auto remove
+        setTimeout(() => {
+            toast.classList.remove('active');
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    }
+
+    // Override browser window.alert to route to custom toasts automatically!
+    window.alert = function(message) {
+        let type = 'info';
+        const lower = message.toLowerCase();
+        if (lower.includes('success') || lower.includes('complete') || lower.includes('committed') || lower.includes('broadcasted') || lower.includes('healthy') || lower.includes('saved') || lower.includes('assigned')) {
+            type = 'success';
+        } else if (lower.includes('failed') || lower.includes('denied') || lower.includes('invalid') || lower.includes('error') || lower.includes('cannot') || lower.includes('must') || lower.includes('aborted') || lower.includes('wrong')) {
+            type = 'error';
+        } else if (lower.includes('warning') || lower.includes('attention') || lower.includes('blocker') || lower.includes('prevented') || lower.includes('de-activated') || lower.includes('deactivated')) {
+            type = 'warning';
+        }
+        showToast(message, type);
+    };
+
     // 1. Authentication Session Check (Guard)
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     if (!currentUser || currentUser.role !== 'main_office') {
@@ -925,31 +974,31 @@ document.addEventListener('DOMContentLoaded', () => {
             console.warn('Failed to parse .env file, resolving CORS or offline backups.', e);
         }
 
-        // Local file:/// protocol CORS override fallback
-        if (location.protocol === 'file:') {
-            console.warn('File protocol detected. Restoring configuration values from LocalStorage.');
-            env.VITE_GOOGLE_MAPS_API_KEY = localStorage.getItem('VITE_GOOGLE_MAPS_API_KEY') || '';
-            env.VITE_SUPABASE_URL = localStorage.getItem('VITE_SUPABASE_URL') || '';
-            env.VITE_SUPABASE_ANON_KEY = localStorage.getItem('VITE_SUPABASE_ANON_KEY') || '';
+        // Retrieve from localStorage if fetch failed or keys are placeholder values
+        env.VITE_GOOGLE_MAPS_API_KEY = env.VITE_GOOGLE_MAPS_API_KEY || localStorage.getItem('VITE_GOOGLE_MAPS_API_KEY') || '';
+        env.VITE_SUPABASE_URL = env.VITE_SUPABASE_URL || localStorage.getItem('VITE_SUPABASE_URL') || '';
+        env.VITE_SUPABASE_ANON_KEY = env.VITE_SUPABASE_ANON_KEY || localStorage.getItem('VITE_SUPABASE_ANON_KEY') || '';
 
-            if (!env.VITE_GOOGLE_MAPS_API_KEY) {
-                const key = prompt("Local File detected. Please input your Google Maps API Key to load GIS:");
-                if (key) {
-                    localStorage.setItem('VITE_GOOGLE_MAPS_API_KEY', key);
-                    env.VITE_GOOGLE_MAPS_API_KEY = key;
-                }
+        // If keys are missing (e.g., fetch failed on file:// or https:// production domains), fallback prompt the administrator
+        if (!env.VITE_GOOGLE_MAPS_API_KEY) {
+            const key = prompt("Google Maps API Key not found. Please input your Google Maps API Key to load GIS:");
+            if (key) {
+                localStorage.setItem('VITE_GOOGLE_MAPS_API_KEY', key);
+                env.VITE_GOOGLE_MAPS_API_KEY = key;
             }
-            if (!env.VITE_SUPABASE_URL) {
-                const url = prompt("Please enter your Supabase URL (or Cancel for Offline mode):");
-                if (url) {
-                    localStorage.setItem('VITE_SUPABASE_URL', url);
-                    env.VITE_SUPABASE_URL = url;
-                    const anon = prompt("Please enter your Supabase Anon Key:");
-                    if (anon) {
-                        localStorage.setItem('VITE_SUPABASE_ANON_KEY', anon);
-                        env.VITE_SUPABASE_ANON_KEY = anon;
-                    }
-                }
+        }
+        if (!env.VITE_SUPABASE_URL) {
+            const url = prompt("Supabase URL not found. Please enter your Supabase URL (or click Cancel for Local storage mode):");
+            if (url) {
+                localStorage.setItem('VITE_SUPABASE_URL', url);
+                env.VITE_SUPABASE_URL = url;
+            }
+        }
+        if (!env.VITE_SUPABASE_ANON_KEY && env.VITE_SUPABASE_URL) {
+            const anon = prompt("Please enter your Supabase Anon Key:");
+            if (anon) {
+                localStorage.setItem('VITE_SUPABASE_ANON_KEY', anon);
+                env.VITE_SUPABASE_ANON_KEY = anon;
             }
         }
         return env;
