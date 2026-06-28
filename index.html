@@ -52,7 +52,6 @@
             </nav>
             <div class="mobile-menu-actions">
                 <a href="login.html" class="btn-text">Login</a>
-                <a href="register.html?role=volunteer" class="btn-primary">Volunteer Now</a>
             </div>
         </div>
     </div>
@@ -74,7 +73,7 @@
                 <p>Providing free quality education to children from underserved communities through neighborhood learning centers.</p>
                 <div class="hero-buttons">
                     <a href="#programs" class="btn-primary">Explore Our Programs</a>
-                    <a href="register.html?role=volunteer" class="btn-secondary">Become a Volunteer</a>
+                    <a href="#volunteer" class="btn-secondary">Become a Volunteer</a>
                 </div>
             </div>
         </div>
@@ -446,9 +445,7 @@
 
             // Hide volunteer button if logged in for cleaner header space
             const desktopVolBtn = document.querySelector('.header-actions a[href="register.html?role=volunteer"]');
-            const mobileVolBtn = document.querySelector('.mobile-menu-actions a[href="register.html?role=volunteer"]');
             if (desktopVolBtn) desktopVolBtn.style.display = 'none';
-            if (mobileVolBtn) mobileVolBtn.style.display = 'none';
         }
     </script>
 </body>

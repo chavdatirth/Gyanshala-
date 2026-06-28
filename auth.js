@@ -427,9 +427,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     callback: window.handleGoogleLoginResponse,
                     auto_select: true
                 });
+                
+                // Calculate card-relative responsive width
+                let btnWidth = 370;
+                const cardEl = document.querySelector('.auth-card');
+                if (cardEl) {
+                    const padding = window.innerWidth < 600 ? 48 : 80;
+                    btnWidth = Math.min(370, Math.max(200, cardEl.clientWidth - padding));
+                }
+
                 google.accounts.id.renderButton(
                     document.getElementById("google-btn-container"),
-                    { theme: "outline", size: "large", width: 370 }
+                    { theme: "outline", size: "large", width: btnWidth }
                 );
                 google.accounts.id.prompt();
             }
