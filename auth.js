@@ -51,6 +51,70 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast(message, type);
     };
 
+    // Seed default mock accounts if users database is empty
+    let usersSeed = JSON.parse(localStorage.getItem('users') || '[]');
+    if (usersSeed.length === 0) {
+        usersSeed = [
+            {
+                id: 'USER-ADMIN',
+                fullName: 'Admin User',
+                email: 'admin@gyanshala.org',
+                mobile: '9999999999',
+                role: 'main_office',
+                password: 'password123',
+                approved: true,
+                dob: '1990-01-01',
+                gender: 'Male',
+                city: 'Ahmedabad',
+                state: 'Gujarat',
+                address: 'Main Office, Gyan Shala'
+            },
+            {
+                id: 'USER-SUPERVISOR',
+                fullName: 'Rajesh Kumar',
+                email: 'supervisor@gyanshala.org',
+                mobile: '9888888888',
+                role: 'supervisor',
+                password: 'password123',
+                approved: true,
+                dob: '1985-05-12',
+                gender: 'Male',
+                city: 'Ahmedabad',
+                state: 'Gujarat',
+                address: 'Supervisor Office'
+            },
+            {
+                id: 'USER-TEACHER',
+                fullName: 'Anjali Sharma',
+                email: 'teacher@gyanshala.org',
+                mobile: '9777777777',
+                role: 'teacher',
+                password: 'password123',
+                approved: true,
+                dob: '1992-08-24',
+                gender: 'Female',
+                city: 'Ahmedabad',
+                state: 'Gujarat',
+                address: 'Sunrise Learning Center Class A'
+            },
+            {
+                id: 'USER-VOLUNTEER',
+                fullName: 'Zenish Patel',
+                email: 'volunteer@gyanshala.org',
+                mobile: '9666666666',
+                role: 'volunteer',
+                password: 'password123',
+                approved: true,
+                dob: '1998-11-03',
+                gender: 'Male',
+                city: 'Ahmedabad',
+                state: 'Gujarat',
+                address: 'Internship Residence'
+            }
+        ];
+        localStorage.setItem('users', JSON.stringify(usersSeed));
+    }
+
     // Environment variables loader
     let envConfig = {
         VITE_EMAILJS_SERVICE_ID: 'service_bjim45r',
@@ -575,4 +639,90 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         initPageGoogleSignIn();
     }, 500);
+
+    // ==========================================
+    // FORGOT PASSWORD SUBMISSION LOGIC
+    // ==========================================
+    const forgotPasswordForm = document.getElementById('forgot-password-form');
+    if (forgotPasswordForm) {
+        forgotPasswordForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const spinner = forgotPasswordForm.querySelector('.spinner');
+            const btnText = forgotPasswordForm.querySelector('.btn-text');
+            const successBox = document.getElementById('success-message');
+
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const userExists = users.some(u => u.email.toLowerCase() === email.toLowerCase());
+
+            if (!userExists) {
+                alert('This email address is not registered.');
+                return;
+            }
+
+            if (spinner) spinner.style.display = 'block';
+            if (btnText) btnText.textContent = 'Sending...';
+
+            setTimeout(() => {
+                if (spinner) spinner.style.display = 'none';
+                if (btnText) btnText.textContent = 'Send Reset Link';
+                
+                // Show success container
+                if (successBox) {
+                    successBox.style.display = 'block';
+                }
+                forgotPasswordForm.reset();
+                
+                alert(`Password reset link sent! (Development Link: reset-password.html?email=${encodeURIComponent(email)})`);
+            }, 1200);
+        });
+    }
+
+    // ==========================================
+    // RESET PASSWORD SUBMISSION LOGIC
+    // ==========================================
+    const resetPasswordForm = document.getElementById('reset-password-form');
+    if (resetPasswordForm) {
+        resetPasswordForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newPassword = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            
+            if (newPassword !== confirmPassword) {
+                alert('Passwords do not match. Please verify passwords.');
+                return;
+            }
+
+            const spinner = resetPasswordForm.querySelector('.spinner');
+            const btnText = resetPasswordForm.querySelector('.btn-text');
+            
+            if (spinner) spinner.style.display = 'block';
+            if (btnText) btnText.textContent = 'Updating...';
+
+            setTimeout(() => {
+                // Get email from URL parameter
+                const urlParams = new URLSearchParams(window.location.search);
+                const email = urlParams.get('email');
+
+                if (email) {
+                    const users = JSON.parse(localStorage.getItem('users') || '[]');
+                    const userIndex = users.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
+                    
+                    if (userIndex !== -1) {
+                        users[userIndex].password = newPassword;
+                        localStorage.setItem('users', JSON.stringify(users));
+                        alert('Password updated successfully! You can now sign in.');
+                        window.location.href = 'login.html';
+                    } else {
+                        alert('Error resetting password: User account not found.');
+                    }
+                } else {
+                    alert('Error: Email parameter missing in URL. Please request reset link again.');
+                }
+                
+                if (spinner) spinner.style.display = 'none';
+                if (btnText) btnText.textContent = 'Update Password';
+            }, 1200);
+        });
+    }
 });

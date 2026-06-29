@@ -345,3 +345,45 @@ input:checked + .slider:before { transform: translateX(20px); }
   .grid-charts, .grid-split { grid-template-columns: 1fr; }
   .search-bar { display: none; }
 }
+
+/* Toast notifications styles */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+}
+.toast {
+  background: #1e293b;
+  color: #ffffff;
+  padding: 16px 24px;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: auto;
+  border-left: 4px solid var(--primary, #2563EB);
+}
+.toast.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+.toast.success {
+  border-left-color: var(--success, #22C55E);
+}
+.toast.error {
+  border-left-color: var(--danger, #DC2626);
+}
+.toast.warning {
+  border-left-color: var(--warning, #F59E0B);
+}

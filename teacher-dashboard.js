@@ -1,5 +1,54 @@
 document.addEventListener('DOMContentLoaded', () => {
-    
+    // ==========================================
+    // CUSTOM TOAST NOTIFICATION NOTIFIERS
+    // ==========================================
+    function showToast(message, type = 'info') {
+        let container = document.getElementById('toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+        }
+        
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        let icon = 'ℹ️';
+        if (type === 'success') icon = '✅';
+        else if (type === 'error') icon = '❌';
+        else if (type === 'warning') icon = '⚠️';
+
+        toast.innerHTML = `
+            <span>${icon}</span>
+            <div>${message}</div>
+        `;
+        container.appendChild(toast);
+
+        // Animate in
+        setTimeout(() => toast.classList.add('active'), 50);
+
+        // Auto remove
+        setTimeout(() => {
+            toast.classList.remove('active');
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    }
+
+    // Override browser window.alert to route to custom toasts automatically!
+    window.alert = function(message) {
+        let type = 'info';
+        const lower = message.toLowerCase();
+        if (lower.includes('success') || lower.includes('complete') || lower.includes('committed') || lower.includes('broadcasted') || lower.includes('healthy') || lower.includes('saved') || lower.includes('assigned') || lower.includes('sent') || lower.includes('added')) {
+            type = 'success';
+        } else if (lower.includes('failed') || lower.includes('denied') || lower.includes('invalid') || lower.includes('error') || lower.includes('cannot') || lower.includes('must') || lower.includes('aborted') || lower.includes('wrong')) {
+            type = 'error';
+        } else if (lower.includes('warning') || lower.includes('attention') || lower.includes('blocker') || lower.includes('prevented') || lower.includes('de-activated') || lower.includes('deactivated')) {
+            type = 'warning';
+        }
+        showToast(message, type);
+    };
+
     // 1. Session check (Auth Guard)
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     if (!currentUser || currentUser.role !== 'teacher') {
