@@ -120,6 +120,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add active to nav
         const activeNav = document.querySelector(`.sidebar-nav .nav-item[data-target="${viewId}"]`);
         if (activeNav) activeNav.classList.add('active');
+
+        // Trigger Google Map rendering
+        if (viewId === 'centers') {
+            renderGISMap();
+        }
     }
 
     navItems.forEach(item => {
@@ -641,4 +646,417 @@ document.addEventListener('DOMContentLoaded', () => {
     renderMessages();
     renderAlerts();
 
+    // ==========================================
+    // GOOGLE MAPS & SUPABASE REAL-TIME GIS SYSTEM
+    // ==========================================
+    let supabaseClient = null;
+    let locationsData = [];
+    let googleMap = null;
+    let googleMapMarkers = [];
+    let googleSearchMarker = null;
+    let googleMyLocationMarker = null;
+    let googleMapClusterer = null;
+
+    // Dynamic Script Loader for Google Maps
+    function loadGoogleMapsScript(apiKey) {
+        return new Promise((resolve, reject) => {
+            if (window.google && window.google.maps) {
+                resolve();
+                return;
+            }
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,marker&v=weekly`;
+            script.async = true;
+            script.defer = true;
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    }
+
+    // Dynamic Environment variables loader
+    async function loadEnv() {
+        const env = {
+            VITE_GOOGLE_MAPS_API_KEY: '',
+            VITE_SUPABASE_URL: '',
+            VITE_SUPABASE_ANON_KEY: ''
+        };
+        try {
+            const res = await fetch('.env');
+            if (res.ok) {
+                const text = await res.text();
+                text.split('\n').forEach(line => {
+                    const parts = line.split('=');
+                    if (parts.length >= 2) {
+                        const key = parts[0].trim();
+                        const val = parts.slice(1).join('=').trim().replace(/^['"]|['"]$/g, '');
+                        env[key] = val;
+                    }
+                });
+            }
+        } catch (e) {
+            console.warn('Failed to parse .env file, resolving CORS or offline backups.', e);
+        }
+
+        env.VITE_GOOGLE_MAPS_API_KEY = env.VITE_GOOGLE_MAPS_API_KEY || localStorage.getItem('VITE_GOOGLE_MAPS_API_KEY') || '';
+        env.VITE_SUPABASE_URL = env.VITE_SUPABASE_URL || localStorage.getItem('VITE_SUPABASE_URL') || '';
+        env.VITE_SUPABASE_ANON_KEY = env.VITE_SUPABASE_ANON_KEY || localStorage.getItem('VITE_SUPABASE_ANON_KEY') || '';
+
+        return env;
+    }
+
+    // Initialize GIS Client systems
+    let envConfig = null;
+    async function initializeGISSystem() {
+        envConfig = await loadEnv();
+
+        // 1. Setup Supabase Client
+        if (envConfig.VITE_SUPABASE_URL && envConfig.VITE_SUPABASE_ANON_KEY) {
+            try {
+                supabaseClient = supabase.createClient(envConfig.VITE_SUPABASE_URL, envConfig.VITE_SUPABASE_ANON_KEY);
+                console.log('Supabase Connection established.');
+                setupSupabaseRealtime();
+            } catch (err) {
+                console.error('Supabase Initialization Failed. Defaulting to local storage.', err);
+                setupMockSupabaseFallback();
+            }
+        } else {
+            console.warn('Supabase credentials missing. Defaulting to local offline storage.');
+            setupMockSupabaseFallback();
+        }
+
+        // 2. Fetch Locations
+        await loadLocationsFromDatabase();
+
+        // 3. Load Google Maps Script
+        if (envConfig.VITE_GOOGLE_MAPS_API_KEY) {
+            try {
+                await loadGoogleMapsScript(envConfig.VITE_GOOGLE_MAPS_API_KEY);
+                console.log('Google Maps ready.');
+                // Render the map if centers view is active on start
+                if (window.location.hash === '#centers') {
+                    renderGISMap();
+                }
+            } catch (err) {
+                console.error('Google Maps Load Error:', err);
+                showGoogleMapsErrorPlaceholder('Library script load failed.');
+            }
+        } else {
+            showGoogleMapsErrorPlaceholder('API key not configured in .env file.');
+        }
+    }
+
+    // Supabase Real-time updates subscription
+    function setupSupabaseRealtime() {
+        if (!supabaseClient) return;
+        supabaseClient
+            .channel('gis_realtime_changes')
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'gis_locations' },
+                async (payload) => {
+                    console.log('Database synchronization received:', payload);
+                    await loadLocationsFromDatabase();
+                    if (googleMap) {
+                        renderMarkersOnGoogleMap();
+                    }
+                }
+            )
+            .subscribe();
+    }
+
+    // Online/Offline status event watchers
+    function setupMockSupabaseFallback() {
+        const handleOnline = () => {
+            const alertBox = document.getElementById('gis-offline-alert');
+            if (alertBox) alertBox.style.display = 'none';
+        };
+        const handleOffline = () => {
+            const alertBox = document.getElementById('gis-offline-alert');
+            if (alertBox) alertBox.style.display = 'flex';
+        };
+
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+        if (!navigator.onLine) handleOffline();
+    }
+
+    // Database Loaders
+    async function loadLocationsFromDatabase() {
+        try {
+            if (supabaseClient) {
+                const { data, error } = await supabaseClient.from('gis_locations').select('*');
+                if (error) throw error;
+                locationsData = data || [];
+            } else {
+                locationsData = JSON.parse(localStorage.getItem('supabase_gis_locations_mock') || '[]');
+            }
+        } catch (err) {
+            console.warn('Supabase fetch failed. Pulling from local cache.', err);
+            locationsData = JSON.parse(localStorage.getItem('supabase_gis_locations_mock') || '[]');
+        }
+    }
+
+    // Google Maps Initializer
+    async function renderGISMap() {
+        const mapContainer = document.getElementById('google-map-container');
+        if (!mapContainer) return;
+
+        // If offline warning needs to be updated
+        const alertBox = document.getElementById('gis-offline-alert');
+        if (alertBox) alertBox.style.display = navigator.onLine ? 'none' : 'flex';
+
+        if (!window.google || !window.google.maps) {
+            showGoogleMapsErrorPlaceholder();
+            return;
+        }
+
+        // Initialize Map Control once
+        if (!googleMap) {
+            const ahmedabad = { lat: 23.0225, lng: 72.5714 };
+
+            googleMap = new google.maps.Map(mapContainer, {
+                center: ahmedabad,
+                zoom: 12,
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                zoomControl: true,
+                mapTypeControl: true,
+                mapTypeControlOptions: {
+                    style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+                    position: google.maps.ControlPosition.TOP_LEFT
+                },
+                streetViewControl: true,
+                fullscreenControl: true,
+                scaleControl: true,
+                rotateControl: true,
+                compass: true
+            });
+
+            // Browser GPS check
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        const userLatLng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                        googleMap.setCenter(userLatLng);
+                        dropMyLocationMarker(userLatLng);
+                    },
+                    () => {
+                        console.log('Location access blocked. Center set to Ahmedabad.');
+                    }
+                );
+            }
+
+            // Wire helpers
+            setupGooglePlacesAutocomplete();
+            setupMapFilters();
+            setupMyLocationButton();
+        }
+
+        // Render markers
+        renderMarkersOnGoogleMap();
+    }
+
+    // Places autocomplete search input handler
+    function setupGooglePlacesAutocomplete() {
+        const input = document.getElementById('gismap-search-input');
+        if (!input) return;
+
+        const autocomplete = new google.maps.places.Autocomplete(input, {
+            fields: ["geometry", "name", "formatted_address"]
+        });
+
+        autocomplete.addListener('place_changed', () => {
+            const place = autocomplete.getPlace();
+            if (!place.geometry || !place.geometry.location) {
+                alert("Location details not found.");
+                return;
+            }
+
+            googleMap.setCenter(place.geometry.location);
+            googleMap.setZoom(16);
+
+            // Clear previous search marker
+            if (googleSearchMarker) googleSearchMarker.setMap(null);
+
+            googleSearchMarker = new google.maps.Marker({
+                position: place.geometry.location,
+                map: googleMap,
+                icon: {
+                    url: 'https://maps.google.com/mapfiles/ms/icons/yellow-dot.png'
+                },
+                title: place.name || 'Searched Point'
+            });
+        });
+    }
+
+    // Map filters layer checkboxes
+    function setupMapFilters() {
+        const ids = ['filter-main-office', 'filter-learning-center', 'filter-classroom', 'filter-volunteer', 'filter-risk-area'];
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('change', () => {
+                    renderMarkersOnGoogleMap();
+                });
+            }
+        });
+    }
+
+    // GPS location center button
+    function setupMyLocationButton() {
+        const btn = document.getElementById('btn-my-location');
+        if (!btn) return;
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        const latlng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                        googleMap.setCenter(latlng);
+                        googleMap.setZoom(16);
+                        dropMyLocationMarker(latlng);
+                    },
+                    (err) => {
+                        alert('Could not acquire GPS: ' + err.message);
+                    }
+                );
+            }
+        });
+    }
+
+    // Drop User location marker
+    function dropMyLocationMarker(latlng) {
+        if (googleMyLocationMarker) googleMyLocationMarker.setMap(null);
+        googleMyLocationMarker = new google.maps.Marker({
+            position: latlng,
+            map: googleMap,
+            icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 7,
+                fillColor: '#3B82F6',
+                fillOpacity: 1,
+                strokeColor: '#FFFFFF',
+                strokeWeight: 2
+            },
+            title: 'My Position'
+        });
+    }
+
+    // Render markers (Supervisor version without edit/delete buttons)
+    function renderMarkersOnGoogleMap() {
+        // 1. Clear previous markers
+        googleMapMarkers.forEach(m => m.setMap(null));
+        googleMapMarkers = [];
+
+        // 2. Fetch filter values
+        const showMainOffice = document.getElementById('filter-main-office').checked;
+        const showLearningCenter = document.getElementById('filter-learning-center').checked;
+        const showClassroom = document.getElementById('filter-classroom').checked;
+        const showVolunteer = document.getElementById('filter-volunteer').checked;
+        const showRiskArea = document.getElementById('filter-risk-area').checked;
+
+        // 3. Render locations
+        locationsData.forEach(loc => {
+            // Apply layer filters
+            if (loc.type === 'Main Office' && !showMainOffice) return;
+            if (loc.type === 'Learning Center' && !showLearningCenter) return;
+            if (loc.type === 'Classroom' && !showClassroom) return;
+            if (loc.type === 'Volunteer' && !showVolunteer) return;
+            if (loc.type === 'Risk Area' && !showRiskArea) return;
+
+            let color = '#2563EB'; // Blue
+            let emoji = '🏢';
+            switch (loc.type) {
+                case 'Main Office': color = '#2563EB'; emoji = '🏢'; break;
+                case 'Learning Center': color = '#16A34A'; emoji = '🎓'; break;
+                case 'Classroom': color = '#D97706'; emoji = '🏫'; break;
+                case 'Volunteer': color = '#7C3AED'; emoji = '🙋'; break;
+                case 'Risk Area': color = '#DC2626'; emoji = '⚠️'; break;
+            }
+
+            const marker = new google.maps.Marker({
+                position: { lat: parseFloat(loc.latitude), lng: parseFloat(loc.longitude) },
+                map: googleMap,
+                label: {
+                    text: emoji,
+                    fontSize: '12px'
+                },
+                icon: {
+                    path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+                    fillColor: color,
+                    fillOpacity: 0.9,
+                    strokeColor: '#FFFFFF',
+                    strokeWeight: 2,
+                    scale: 6
+                },
+                title: loc.name
+            });
+
+            // InfoWindow content builder
+            const statusColor = loc.status === 'Healthy' ? '#16A34A' : (loc.status === 'Warning' ? '#D97706' : '#EF4444');
+            const infoWindow = new google.maps.InfoWindow({
+                content: `
+                    <div style="font-family:'Poppins', sans-serif; padding: 12px; min-width: 250px; color:#1E293B;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #E2E8F0; padding-bottom:6px; margin-bottom:8px;">
+                            <h3 style="margin:0; font-size:1rem; color:#0F172A;">${loc.name}</h3>
+                            <span style="font-size:0.75rem; font-weight:600; padding:2px 8px; border-radius:12px; background:${color}15; color:${color};">${loc.type}</span>
+                        </div>
+                        
+                        ${loc.photo_url ? `<div style="text-align:center; margin-bottom:8px;"><img src="${loc.photo_url}" style="max-width:100%; max-height:85px; border-radius:6px; object-fit:cover;"></div>` : ''}
+
+                        <table style="width:100%; font-size:0.8rem; border-collapse:collapse; margin-bottom:8px;">
+                            <tr><td style="padding:3px 0; color:#64748B;"><strong>Lead:</strong></td><td style="text-align:right;">${loc.teacher || 'N/A'}</td></tr>
+                            <tr><td style="padding:3px 0; color:#64748B;"><strong>Capacity:</strong></td><td style="text-align:right;">${loc.capacity || '0'}</td></tr>
+                            <tr><td style="padding:3px 0; color:#64748B;"><strong>Contact:</strong></td><td style="text-align:right;">${loc.contact || 'N/A'}</td></tr>
+                            <tr><td style="padding:3px 0; color:#64748B;"><strong>Status:</strong></td><td style="text-align:right; font-weight:600; color:${statusColor};">${loc.status || 'Healthy'}</td></tr>
+                            <tr><td style="padding:3px 0; color:#64748B;"><strong>Address:</strong></td><td style="text-align:right; max-width:140px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${loc.address}">${loc.address}</td></tr>
+                        </table>
+
+                        <div style="display:flex; justify-content:space-between; margin-top:8px; gap:8px;">
+                            <a href="https://www.google.com/maps/dir/?api=1&destination=${loc.latitude},${loc.longitude}" target="_blank" style="flex:1; padding:8px; font-size:0.8rem; font-weight:600; border:none; background:#2563EB; color:white; border-radius:6px; cursor:pointer; text-align:center; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:4px;"><span class="material-symbols-rounded" style="font-size:16px;">navigation</span> Get Directions</a>
+                        </div>
+                    </div>
+                `
+            });
+
+            // Markers click popup opener
+            marker.addListener('click', () => {
+                infoWindow.open(googleMap, marker);
+            });
+
+            googleMapMarkers.push(marker);
+        });
+
+        // Add Marker Clustering for 50+ locations
+        if (window.MarkerClusterer && googleMapMarkers.length > 50) {
+            if (googleMapClusterer) googleMapClusterer.clearMarkers();
+            googleMapClusterer = new MarkerClusterer(googleMap, googleMapMarkers, {
+                imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'
+            });
+        }
+    }
+
+    // Google Maps Error Placeholder fallback
+    function showGoogleMapsErrorPlaceholder(msg) {
+        const mapContainer = document.getElementById('google-map-container');
+        if (!mapContainer) return;
+
+        mapContainer.style.background = '#f8fafc';
+        mapContainer.style.display = 'flex';
+        mapContainer.style.flexDirection = 'column';
+        mapContainer.style.alignItems = 'center';
+        mapContainer.style.justifyContent = 'center';
+        mapContainer.style.gap = '16px';
+        mapContainer.style.padding = '32px';
+        mapContainer.style.textAlign = 'center';
+
+        mapContainer.innerHTML = `
+            <span class="material-symbols-rounded" style="font-size: 64px; color: var(--danger);">report_problem</span>
+            <h3 style="margin: 0; font-size: 1.25rem; color: #1e293b;">Unable to load Google Maps.</h3>
+            <p style="margin: 0; color: var(--text-body); font-size: 0.9rem; max-width: 350px;">${msg || 'Check your network connection or verify your Google Maps API Key.'}</p>
+        `;
+    }
+
+    // Initialize environment loader immediately at page startup
+    initializeGISSystem();
 });

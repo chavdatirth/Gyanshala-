@@ -6,6 +6,8 @@
     <title>Gyanshala Supervisor Dashboard</title>
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="dashboard-extension.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-marker-clusterer/1.0.0/markerclusterer.js"></script>
 </head>
 <body>
 
@@ -272,34 +274,54 @@
         </section>
 
         <!-- 4. Interactive Map View -->
-        <section id="view-centers" class="page-view">
+        <section id="view-centers" class="page-view" style="display: flex; flex-direction: column; flex: 1;">
             <div class="flex-between" style="margin-bottom: 24px;">
                 <h2>Interactive Center Map</h2>
-                <div class="flex-start" style="background: var(--surface); padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border);">
-                    <span style="display:flex; gap:6px; align-items:center;"><span class="dot dot-healthy"></span> Healthy</span>
-                    <span style="display:flex; gap:6px; align-items:center;"><span class="dot dot-critical"></span> Critical</span>
-                </div>
             </div>
-            
-            <div class="glass-card map-container" style="flex: 1; min-height: 400px;">
-                <div class="map-background">
-                    <!-- Sunrise Center -->
-                    <div class="map-marker marker-healthy" style="top: 30%; left: 40%;">
-                        <div class="marker-pin"></div><div class="marker-pulse"></div>
-                        <div class="marker-tooltip"><strong>Sunrise Center</strong><small class="status-text text-success">HEALTHY</small></div>
-                    </div>
-                    
-                    <!-- Hope Hub -->
-                    <div class="map-marker marker-critical" style="top: 50%; left: 60%;">
-                        <div class="marker-pin"></div><div class="marker-pulse"></div>
-                        <div class="marker-tooltip"><strong>Hope Hub</strong><small class="status-text text-danger">CRITICAL</small></div>
-                    </div>
-                    
-                    <!-- Bright Future -->
-                    <div class="map-marker marker-needs-visit" style="top: 70%; left: 30%;">
-                        <div class="marker-pin"></div><div class="marker-pulse"></div>
-                        <div class="marker-tooltip"><strong>Bright Future</strong><small class="status-text text-warning">NEEDS VISIT</small></div>
-                    </div>
+
+            <!-- Search & GPS Control -->
+            <div class="flex-between" style="margin-bottom: 16px; gap: 16px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 280px; position: relative;">
+                    <span class="material-symbols-rounded" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-body);">search</span>
+                    <input type="text" id="gismap-search-input" placeholder="Search City, Area, Village, School, NGO, Street, Building..." style="width: 100%; padding: 10px 16px 10px 40px; border: 1px solid var(--border); border-radius: var(--radius-md); outline: none; background: var(--surface); color: var(--text-dark); font-family: inherit;">
+                </div>
+                <button class="btn-outline" id="btn-my-location" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: var(--radius-md); font-weight: 500;">
+                    <span class="material-symbols-rounded" style="font-size: 20px;">my_location</span> My Location
+                </button>
+            </div>
+
+            <!-- Interactive Map Area -->
+            <div class="map-wrapper" style="position: relative; flex: 1; min-height: 500px; display: flex;">
+                <div id="google-map-container" style="width: 100%; height: 100%; min-height: 500px; border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden;"></div>
+                
+                <!-- Offline Warning Indicator -->
+                <div id="gis-offline-alert" style="display: none; position: absolute; top: 16px; left: 50%; transform: translateX(-50%); background: #EF4444; color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: var(--shadow-md); z-index: 100; align-items: center; gap: 6px;">
+                    <span class="material-symbols-rounded" style="font-size:18px;">cloud_off</span> You are offline. Changes will sync when online.
+                </div>
+
+                <!-- Floating Sidebar Layers Panel -->
+                <div class="map-filter-panel" style="position: absolute; top: 16px; right: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; box-shadow: var(--shadow-md); z-index: 10; width: 200px; display: flex; flex-direction: column; gap: 12px;">
+                    <h4 style="margin: 0 0 8px 0; border-bottom: 1px solid var(--border); padding-bottom: 4px; font-size: 0.9rem; font-weight: 600;">Map Layers</h4>
+                    <label class="map-filter-item" style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-dark); cursor: pointer;">
+                        <input type="checkbox" id="filter-main-office" checked style="cursor: pointer;">
+                        <span>🏢 Main Office</span>
+                    </label>
+                    <label class="map-filter-item" style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-dark); cursor: pointer;">
+                        <input type="checkbox" id="filter-learning-center" checked style="cursor: pointer;">
+                        <span>🎓 Learning Center</span>
+                    </label>
+                    <label class="map-filter-item" style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-dark); cursor: pointer;">
+                        <input type="checkbox" id="filter-classroom" checked style="cursor: pointer;">
+                        <span>🏫 Classroom</span>
+                    </label>
+                    <label class="map-filter-item" style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-dark); cursor: pointer;">
+                        <input type="checkbox" id="filter-volunteer" checked style="cursor: pointer;">
+                        <span>🙋 Volunteer</span>
+                    </label>
+                    <label class="map-filter-item" style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-dark); cursor: pointer;">
+                        <input type="checkbox" id="filter-risk-area" checked style="cursor: pointer;">
+                        <span>⚠️ Risk Areas</span>
+                    </label>
                 </div>
             </div>
         </section>
