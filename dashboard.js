@@ -656,20 +656,49 @@ document.addEventListener('DOMContentLoaded', () => {
     let googleSearchMarker = null;
     let googleMyLocationMarker = null;
     let googleMapClusterer = null;
+    let gisInitializationPromise = null;
 
     // Dynamic Script Loader for Google Maps
     function loadGoogleMapsScript(apiKey) {
         return new Promise((resolve, reject) => {
+            // 1. If google maps object is already loaded, resolve immediately
             if (window.google && window.google.maps) {
                 resolve();
                 return;
             }
+            
+            // 2. If the script is already in the document, wait for it or resolve
+            const existingScript = document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]');
+            if (existingScript) {
+                if (window.google && window.google.maps) {
+                    resolve();
+                } else {
+                    const timer = setInterval(() => {
+                        if (window.google && window.google.maps) {
+                            clearInterval(timer);
+                            resolve();
+                        }
+                    }, 100);
+                    // Safety timeout of 15s
+                    setTimeout(() => {
+                        clearInterval(timer);
+                        reject(new Error('Google Maps script load timed out.'));
+                    }, 15000);
+                }
+                return;
+            }
+
+            // 3. Create and append the script
             const script = document.createElement('script');
             script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,marker&v=weekly`;
             script.async = true;
             script.defer = true;
-            script.onload = resolve;
-            script.onerror = reject;
+            script.onload = () => {
+                resolve();
+            };
+            script.onerror = () => {
+                reject(new Error('Google Maps script failed to load (Network/Billing/Key Error).'));
+            };
             document.head.appendChild(script);
         });
     }
@@ -681,6 +710,22 @@ document.addEventListener('DOMContentLoaded', () => {
             VITE_SUPABASE_URL: '',
             VITE_SUPABASE_ANON_KEY: ''
         };
+
+        // 1. Try Vercel Serverless API first
+        try {
+            const res = await fetch('/api/env');
+            if (res.ok) {
+                const data = await res.json();
+                if (data && data.VITE_GOOGLE_MAPS_API_KEY) {
+                    console.log('Environment variables loaded from serverless API.');
+                    return data;
+                }
+            }
+        } catch (e) {
+            console.log('Vercel serverless API not available, falling back to local files.');
+        }
+
+        // 2. Fallback to local .env file
         try {
             const res = await fetch('.env');
             if (res.ok) {
@@ -707,43 +752,57 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize GIS Client systems
     let envConfig = null;
-    async function initializeGISSystem() {
-        envConfig = await loadEnv();
+    function initializeGISSystem() {
+        if (gisInitializationPromise) return gisInitializationPromise;
 
-        // 1. Setup Supabase Client
-        if (envConfig.VITE_SUPABASE_URL && envConfig.VITE_SUPABASE_ANON_KEY) {
-            try {
-                supabaseClient = supabase.createClient(envConfig.VITE_SUPABASE_URL, envConfig.VITE_SUPABASE_ANON_KEY);
-                console.log('Supabase Connection established.');
-                setupSupabaseRealtime();
-            } catch (err) {
-                console.error('Supabase Initialization Failed. Defaulting to local storage.', err);
+        gisInitializationPromise = (async () => {
+            envConfig = await loadEnv();
+
+            // Set up Global Error handler for maps authentication
+            window.gm_authFailure = () => {
+                console.error("Google Maps API authentication failed. Verify API Key restrictions, billing, or referrer policies in Google Cloud Console.");
+                showGoogleMapsErrorPlaceholder("API authentication failed. This can be caused by:\n- Invalid API Key\n- Referer Not Allowed (gyanshala-gamma.vercel.app/*)\n- Billing Disabled on Google Cloud Project\n- Maps JavaScript API Disabled\n- Quota Exceeded");
+            };
+
+            // 1. Setup Supabase Client
+            if (envConfig.VITE_SUPABASE_URL && envConfig.VITE_SUPABASE_ANON_KEY) {
+                try {
+                    supabaseClient = supabase.createClient(envConfig.VITE_SUPABASE_URL, envConfig.VITE_SUPABASE_ANON_KEY);
+                    console.log('Supabase Connection established.');
+                    setupSupabaseRealtime();
+                } catch (err) {
+                    console.error('Supabase Initialization Failed. Defaulting to local storage.', err);
+                    setupMockSupabaseFallback();
+                }
+            } else {
+                console.warn('Supabase credentials missing. Defaulting to local offline storage.');
                 setupMockSupabaseFallback();
             }
-        } else {
-            console.warn('Supabase credentials missing. Defaulting to local offline storage.');
-            setupMockSupabaseFallback();
-        }
 
-        // 2. Fetch Locations
-        await loadLocationsFromDatabase();
+            // 2. Fetch Locations
+            await loadLocationsFromDatabase();
 
-        // 3. Load Google Maps Script
-        if (envConfig.VITE_GOOGLE_MAPS_API_KEY) {
-            try {
-                await loadGoogleMapsScript(envConfig.VITE_GOOGLE_MAPS_API_KEY);
-                console.log('Google Maps ready.');
-                // Render the map if centers view is active on start
-                if (window.location.hash === '#centers') {
-                    renderGISMap();
+            // 3. Load Google Maps Script
+            if (envConfig.VITE_GOOGLE_MAPS_API_KEY) {
+                try {
+                    await loadGoogleMapsScript(envConfig.VITE_GOOGLE_MAPS_API_KEY);
+                    console.log('Google Maps ready.');
+                    // Render the map if centers view is active on start
+                    if (window.location.hash === '#centers') {
+                        renderGISMap();
+                    }
+                } catch (err) {
+                    console.error('Google Maps Load Error:', err);
+                    showGoogleMapsErrorPlaceholder('Library script load failed: ' + err.message);
+                    throw err;
                 }
-            } catch (err) {
-                console.error('Google Maps Load Error:', err);
-                showGoogleMapsErrorPlaceholder('Library script load failed.');
+            } else {
+                showGoogleMapsErrorPlaceholder('API key not configured in .env file or Vercel Environment Variables.');
+                throw new Error('API key missing');
             }
-        } else {
-            showGoogleMapsErrorPlaceholder('API key not configured in .env file.');
-        }
+        })();
+
+        return gisInitializationPromise;
     }
 
     // Supabase Real-time updates subscription
@@ -1054,8 +1113,51 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="material-symbols-rounded" style="font-size: 64px; color: var(--danger);">report_problem</span>
             <h3 style="margin: 0; font-size: 1.25rem; color: #1e293b;">Unable to load Google Maps.</h3>
             <p style="margin: 0; color: var(--text-body); font-size: 0.9rem; max-width: 350px;">${msg || 'Check your network connection or verify your Google Maps API Key.'}</p>
+            <button class="btn-primary" id="btn-maps-retry" style="padding: 10px 24px; border-radius: var(--radius-md);">Retry Loading</button>
         `;
+
+        const retry = document.getElementById('btn-maps-retry');
+        if (retry) {
+            retry.addEventListener('click', (e) => {
+                e.preventDefault();
+                mapContainer.innerHTML = '<p style="color:var(--text-body);">Reloading Google Maps...</p>';
+                gisInitializationPromise = null; // Clear cached promise on manual retry!
+                initializeGISSystem().then(() => {
+                    renderGISMap();
+                }).catch(err => {
+                    console.error('Retry failed:', err);
+                });
+            });
+        }
     }
+
+    // View Center on Map triggers
+    document.querySelectorAll('.view-center-on-map').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const lat = parseFloat(btn.getAttribute('data-lat'));
+            const lng = parseFloat(btn.getAttribute('data-lng'));
+            
+            // Switch view
+            switchView('centers');
+            
+            // Center Google Map
+            if (googleMap) {
+                googleMap.setCenter({ lat, lng });
+                googleMap.setZoom(15);
+            } else {
+                // If map not loaded yet, wait for initialization
+                initializeGISSystem().then(() => {
+                    renderGISMap().then(() => {
+                        if (googleMap) {
+                            googleMap.setCenter({ lat, lng });
+                            googleMap.setZoom(15);
+                        }
+                    });
+                });
+            }
+        });
+    });
 
     // Initialize environment loader immediately at page startup
     initializeGISSystem();

@@ -932,20 +932,49 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // GOOGLE MAPS & SUPABASE REAL-TIME GIS SYSTEM
     // ==========================================
+    let gisInitializationPromise = null;
 
     // Dynamic Script Loader for Google Maps
     function loadGoogleMapsScript(apiKey) {
         return new Promise((resolve, reject) => {
+            // 1. If google maps object is already loaded, resolve immediately
             if (window.google && window.google.maps) {
                 resolve();
                 return;
             }
+            
+            // 2. If the script is already in the document, wait for it or resolve
+            const existingScript = document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]');
+            if (existingScript) {
+                if (window.google && window.google.maps) {
+                    resolve();
+                } else {
+                    const timer = setInterval(() => {
+                        if (window.google && window.google.maps) {
+                            clearInterval(timer);
+                            resolve();
+                        }
+                    }, 100);
+                    // Safety timeout of 15s
+                    setTimeout(() => {
+                        clearInterval(timer);
+                        reject(new Error('Google Maps script load timed out.'));
+                    }, 15000);
+                }
+                return;
+            }
+
+            // 3. Create and append the script
             const script = document.createElement('script');
             script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,marker&v=weekly`;
             script.async = true;
             script.defer = true;
-            script.onload = resolve;
-            script.onerror = reject;
+            script.onload = () => {
+                resolve();
+            };
+            script.onerror = () => {
+                reject(new Error('Google Maps script failed to load (Network/Billing/Key Error).'));
+            };
             document.head.appendChild(script);
         });
     }
@@ -957,6 +986,22 @@ document.addEventListener('DOMContentLoaded', () => {
             VITE_SUPABASE_URL: '',
             VITE_SUPABASE_ANON_KEY: ''
         };
+
+        // 1. Try Vercel Serverless API first
+        try {
+            const res = await fetch('/api/env');
+            if (res.ok) {
+                const data = await res.json();
+                if (data && data.VITE_GOOGLE_MAPS_API_KEY) {
+                    console.log('Environment variables loaded from serverless API.');
+                    return data;
+                }
+            }
+        } catch (e) {
+            console.log('Vercel serverless API not available, falling back to local files.');
+        }
+
+        // 2. Fallback to local .env file
         try {
             const res = await fetch('.env');
             if (res.ok) {
@@ -984,39 +1029,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize GIS Client systems
     let envConfig = null;
-    async function initializeGISSystem() {
-        envConfig = await loadEnv();
+    function initializeGISSystem() {
+        if (gisInitializationPromise) return gisInitializationPromise;
 
-        // 1. Setup Supabase Client
-        if (envConfig.VITE_SUPABASE_URL && envConfig.VITE_SUPABASE_ANON_KEY) {
-            try {
-                supabaseClient = supabase.createClient(envConfig.VITE_SUPABASE_URL, envConfig.VITE_SUPABASE_ANON_KEY);
-                console.log('Supabase Connection established.');
-                setupSupabaseRealtime();
-            } catch (err) {
-                console.error('Supabase Initialization Failed. Defaulting to local storage.', err);
+        gisInitializationPromise = (async () => {
+            envConfig = await loadEnv();
+
+            // Set up Global Error handler for maps authentication
+            window.gm_authFailure = () => {
+                console.error("Google Maps API authentication failed. Verify API Key restrictions, billing, or referrer policies in Google Cloud Console.");
+                showGoogleMapsErrorPlaceholder("API authentication failed. This can be caused by:\n- Invalid API Key\n- Referer Not Allowed (gyanshala-gamma.vercel.app/*)\n- Billing Disabled on Google Cloud Project\n- Maps JavaScript API Disabled\n- Quota Exceeded");
+            };
+
+            // 1. Setup Supabase Client
+            if (envConfig.VITE_SUPABASE_URL && envConfig.VITE_SUPABASE_ANON_KEY) {
+                try {
+                    supabaseClient = supabase.createClient(envConfig.VITE_SUPABASE_URL, envConfig.VITE_SUPABASE_ANON_KEY);
+                    console.log('Supabase Connection established.');
+                    setupSupabaseRealtime();
+                } catch (err) {
+                    console.error('Supabase Initialization Failed. Defaulting to local storage.', err);
+                    setupMockSupabaseFallback();
+                }
+            } else {
+                console.warn('Supabase credentials missing. Defaulting to local offline storage.');
                 setupMockSupabaseFallback();
             }
-        } else {
-            console.warn('Supabase credentials missing. Defaulting to local offline storage.');
-            setupMockSupabaseFallback();
-        }
 
-        // 2. Fetch Locations
-        await loadLocationsFromDatabase();
+            // 2. Fetch Locations
+            await loadLocationsFromDatabase();
 
-        // 3. Load Google Maps Script
-        if (envConfig.VITE_GOOGLE_MAPS_API_KEY) {
-            try {
-                await loadGoogleMapsScript(envConfig.VITE_GOOGLE_MAPS_API_KEY);
-                console.log('Google Maps ready.');
-            } catch (err) {
-                console.error('Google Maps Load Error:', err);
-                showGoogleMapsErrorPlaceholder('Library script load failed.');
+            // 3. Load Google Maps Script
+            if (envConfig.VITE_GOOGLE_MAPS_API_KEY) {
+                try {
+                    await loadGoogleMapsScript(envConfig.VITE_GOOGLE_MAPS_API_KEY);
+                    console.log('Google Maps ready.');
+                } catch (err) {
+                    console.error('Google Maps Load Error:', err);
+                    showGoogleMapsErrorPlaceholder('Library script load failed: ' + err.message);
+                    throw err;
+                }
+            } else {
+                showGoogleMapsErrorPlaceholder('API key not configured in .env file or Vercel Environment Variables.');
+                throw new Error('API key missing');
             }
-        } else {
-            showGoogleMapsErrorPlaceholder('API key not configured in .env file.');
-        }
+        })();
+
+        return gisInitializationPromise;
     }
 
     // Supabase Real-time updates subscription
